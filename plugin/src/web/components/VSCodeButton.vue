@@ -12,9 +12,28 @@ const props = defineProps({
   }
 })
 
+const homedir = ref(null)
+
+// Fetch homedir on mount
+onMounted(async () => {
+  try {
+    const data = await $fetch('/api/system/homedir')
+    homedir.value = data.homedir
+  } catch (e) {
+    console.error('Failed to get homedir:', e)
+    // Fallback
+    homedir.value = '/Users/' + (navigator.userAgent.includes('Mac') ? Intl.DateTimeFormat().resolvedOptions().timeZone.split('/')[1] || 'user' : 'user')
+  }
+})
+
 const openInVSCode = () => {
-  // Use vscode:// URL scheme to open in VS Code
-  const expandedPath = props.path.replace('~', '/Users/' + (process.env.USER || 'user'))
+  if (!homedir.value) {
+    alert('Unable to determine home directory')
+    return
+  }
+
+  // Replace ~ with actual home directory
+  const expandedPath = props.path.replace('~', homedir.value)
   window.location.href = `vscode://file${expandedPath}`
 }
 </script>

@@ -49,7 +49,7 @@ useHead({
 
 .library-container {
   min-height: 100vh;
-  background: #faf8f5;
+  background: #ffffff;
 }
 
 /* Top Navigation */
@@ -60,7 +60,7 @@ useHead({
   right: 0;
   height: 64px;
   background: rgba(255, 255, 255, 0.95);
-  border-bottom: 1px solid #e8e2db;
+  border-bottom: 1px solid #e5e7eb;
   display: flex;
   align-items: center;
   padding: 0 2rem;
@@ -72,14 +72,14 @@ useHead({
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #3d3430;
+  color: #1f2937;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
 }
 
 .logo-icon {
   font-size: 1.25rem;
-  color: #8b7355;
+  color: #6b7280;
 }
 
 .logo-text {
@@ -105,23 +105,23 @@ h1 {
   font-family: 'Crimson Pro', serif;
   font-size: 2.5rem;
   font-weight: 600;
-  color: #2d2520;
+  color: #111827;
   margin: 0 0 0.75rem 0;
 }
 
 .subtitle {
   font-family: 'Inter', sans-serif;
   font-size: 1rem;
-  color: #8b7355;
+  color: #6b7280;
   margin: 0;
 }
 
 .subtitle code {
-  background: #e8e2db;
+  background: #e5e7eb;
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
   font-size: 0.9em;
-  color: #6b5d54;
+  color: #374151;
 }
 
 .papers-grid {
@@ -139,14 +139,14 @@ h1 {
   justify-content: center;
   gap: 1.5rem;
   padding: 6rem 2rem;
-  color: #6b5d54;
+  color: #374151;
 }
 
 .spinner {
   width: 48px;
   height: 48px;
-  border: 3px solid #e8e2db;
-  border-top-color: #8b7355;
+  border: 3px solid #e5e7eb;
+  border-top-color: #6b7280;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -159,15 +159,15 @@ h1 {
 .error-state {
   padding: 6rem 2rem;
   text-align: center;
-  color: #8b7355;
+  color: #6b7280;
   font-family: 'Inter', sans-serif;
 }
 
 .empty-state code {
-  background: #e8e2db;
+  background: #e5e7eb;
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
-  color: #6b5d54;
+  color: #374151;
 }
 
 .error-state {

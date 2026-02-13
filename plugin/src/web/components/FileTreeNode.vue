@@ -95,16 +95,16 @@ const getFileIcon = (filename: string): string => {
   cursor: pointer;
   transition: background 0.15s ease;
   font-size: 0.875rem;
-  color: #6b5d54;
+  color: #374151;
 }
 
 .node-content:hover {
-  background: #f5f1ed;
+  background: #f8f9fa;
 }
 
 .node-content.selected {
-  background: #e8e2db;
-  color: #3d3430;
+  background: #e5e7eb;
+  color: #1f2937;
   font-weight: 500;
 }
 
@@ -122,7 +122,7 @@ const getFileIcon = (filename: string): string => {
 }
 
 .expand-icon {
-  color: #8b7355;
+  color: #6b7280;
   font-size: 0.625rem;
 }
 
@@ -139,7 +139,7 @@ const getFileIcon = (filename: string): string => {
 
 .children {
   padding-left: 1rem;
-  border-left: 1px solid #f5f1ed;
+  border-left: 1px solid #f8f9fa;
   margin-left: 1rem;
 }
 </style>

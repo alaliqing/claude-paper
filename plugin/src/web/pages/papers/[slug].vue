@@ -40,12 +40,16 @@
       <div class="main-content">
         <!-- Sidebar File Tree -->
         <aside class="sidebar" :class="{ collapsed: sidebarCollapsed }">
-          <div class="sidebar-header">
+          <div v-if="!sidebarCollapsed" class="sidebar-header">
             <h3>Study Materials</h3>
-            <button @click="toggleSidebar" class="collapse-btn" :title="sidebarCollapsed ? 'Expand' : 'Collapse'">
-              {{ sidebarCollapsed ? '→' : '←' }}
+            <button @click="toggleSidebar" class="collapse-btn" title="Collapse">
+              ←
             </button>
           </div>
+
+          <button v-else @click="toggleSidebar" class="expand-btn" title="Expand">
+            →
+          </button>
 
           <div v-if="!sidebarCollapsed" class="file-tree">
             <FileTreeNode
@@ -177,7 +181,7 @@ useHead({
 
 .reader-container {
   min-height: 100vh;
-  background: #faf8f5;
+  background: #ffffff;
   font-family: 'Inter', sans-serif;
 }
 
@@ -189,14 +193,14 @@ useHead({
   align-items: center;
   justify-content: center;
   gap: 1.5rem;
-  color: #6b5d54;
+  color: #374151;
 }
 
 .spinner {
   width: 48px;
   height: 48px;
-  border: 3px solid #e8e2db;
-  border-top-color: #8b7355;
+  border: 3px solid #e5e7eb;
+  border-top-color: #6b7280;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -226,20 +230,20 @@ useHead({
   font-family: 'Crimson Pro', serif;
   font-size: 1.75rem;
   font-weight: 600;
-  color: #3d3430;
+  color: #1f2937;
   margin: 0;
 }
 
 .error-state p {
-  color: #8b7355;
+  color: #6b7280;
   margin: 0;
 }
 
 .back-home {
   margin-top: 1rem;
   padding: 0.75rem 1.5rem;
-  background: #3d3430;
-  color: #faf8f5;
+  background: #1f2937;
+  color: #ffffff;
   text-decoration: none;
   border-radius: 6px;
   font-size: 0.9rem;
@@ -247,7 +251,7 @@ useHead({
 }
 
 .back-home:hover {
-  background: #2d2520;
+  background: #111827;
 }
 
 /* Top Navigation */
@@ -258,7 +262,7 @@ useHead({
   right: 0;
   height: 64px;
   background: #ffffff;
-  border-bottom: 1px solid #e8e2db;
+  border-bottom: 1px solid #e5e7eb;
   display: flex;
   align-items: center;
   padding: 0 2rem;
@@ -273,7 +277,7 @@ useHead({
   align-items: center;
   gap: 0.5rem;
   text-decoration: none;
-  color: #3d3430;
+  color: #1f2937;
   font-weight: 500;
   white-space: nowrap;
   padding: 0.5rem 1rem;
@@ -283,8 +287,8 @@ useHead({
 }
 
 .back-to-library:hover {
-  background: #f5f1ed;
-  color: #8b7355;
+  background: #f8f9fa;
+  color: #6b7280;
 }
 
 .back-arrow {
@@ -305,7 +309,7 @@ useHead({
   font-family: 'Crimson Pro', serif;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #6b5d54;
+  color: #374151;
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -324,8 +328,8 @@ useHead({
   gap: 0.4rem;
   padding: 0.5rem 1rem;
   background: transparent;
-  border: 1px solid #d4ccc3;
-  color: #6b5d54;
+  border: 1px solid #d1d5db;
+  color: #374151;
   text-decoration: none;
   border-radius: 6px;
   font-size: 0.875rem;
@@ -333,8 +337,8 @@ useHead({
 }
 
 .external-link:hover {
-  background: #f5f1ed;
-  border-color: #8b7355;
+  background: #f8f9fa;
+  border-color: #6b7280;
 }
 
 .arrow {
@@ -353,12 +357,13 @@ useHead({
 .sidebar {
   width: 280px;
   background: #ffffff;
-  border-right: 1px solid #e8e2db;
+  border-right: 1px solid #e5e7eb;
   overflow-y: auto;
   transition: width 0.3s ease, opacity 0.3s ease;
   position: sticky;
   top: 64px;
   height: calc(100vh - 64px);
+  position: relative;
 }
 
 .sidebar.collapsed {
@@ -374,22 +379,22 @@ useHead({
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem 1rem;
-  border-bottom: 1px solid #e8e2db;
-  background: #faf8f5;
+  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
 }
 
 .sidebar-header h3 {
   font-family: 'Crimson Pro', serif;
   font-size: 1rem;
   font-weight: 600;
-  color: #3d3430;
+  color: #1f2937;
   margin: 0;
 }
 
 .collapse-btn {
   background: none;
   border: none;
-  color: #8b7355;
+  color: #6b7280;
   font-size: 1.25rem;
   cursor: pointer;
   padding: 0.25rem;
@@ -398,7 +403,30 @@ useHead({
 }
 
 .collapse-btn:hover {
-  color: #3d3430;
+  color: #1f2937;
+}
+
+.expand-btn {
+  position: absolute;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #6b7280;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  line-height: 1;
+  border-radius: 4px;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.expand-btn:hover {
+  background: #f8f9fa;
+  color: #1f2937;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .file-tree {
@@ -414,8 +442,8 @@ useHead({
 
 .reading-header {
   padding: 1.5rem 3rem;
-  border-bottom: 1px solid #e8e2db;
-  background: #faf8f5;
+  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
 }
 
 .breadcrumb {
@@ -423,7 +451,7 @@ useHead({
   align-items: center;
   gap: 0.5rem;
   font-size: 0.875rem;
-  color: #8b7355;
+  color: #6b7280;
   font-family: 'Inter', monospace;
 }
 
@@ -434,7 +462,7 @@ useHead({
 .file-name {
   opacity: 1;
   font-weight: 500;
-  color: #3d3430;
+  color: #1f2937;
 }
 
 .separator {
@@ -468,9 +496,9 @@ useHead({
   height: 400px;
   background: linear-gradient(
     90deg,
-    #f5f1ed 25%,
-    #e8e2db 50%,
-    #f5f1ed 75%
+    #f8f9fa 25%,
+    #e5e7eb 50%,
+    #f8f9fa 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
@@ -485,7 +513,7 @@ useHead({
 .empty-state {
   padding: 4rem 2rem;
   text-align: center;
-  color: #a39588;
+  color: #9ca3af;
 }
 
 /* Markdown Styles */
@@ -493,7 +521,7 @@ useHead({
   font-family: 'Crimson Pro', serif;
   font-size: 1.125rem;
   line-height: 1.8;
-  color: #3d3430;
+  color: #1f2937;
 }
 
 .markdown-body :deep(h1),
@@ -502,7 +530,7 @@ useHead({
 .markdown-body :deep(h4) {
   font-family: 'Crimson Pro', serif;
   font-weight: 600;
-  color: #2d2520;
+  color: #111827;
   margin-top: 2rem;
   margin-bottom: 1rem;
   line-height: 1.3;
@@ -510,14 +538,14 @@ useHead({
 
 .markdown-body :deep(h1) {
   font-size: 2.25rem;
-  border-bottom: 2px solid #e8e2db;
+  border-bottom: 2px solid #e5e7eb;
   padding-bottom: 0.5rem;
   margin-top: 0;
 }
 
 .markdown-body :deep(h2) {
   font-size: 1.75rem;
-  border-bottom: 1px solid #f5f1ed;
+  border-bottom: 1px solid #f8f9fa;
   padding-bottom: 0.4rem;
 }
 
@@ -534,36 +562,36 @@ useHead({
 }
 
 .markdown-body :deep(a) {
-  color: #8b7355;
+  color: #6b7280;
   text-decoration: underline;
-  text-decoration-color: #d4ccc3;
+  text-decoration-color: #d1d5db;
   text-underline-offset: 2px;
   transition: all 0.2s;
 }
 
 .markdown-body :deep(a:hover) {
-  color: #6b5d54;
-  text-decoration-color: #8b7355;
+  color: #374151;
+  text-decoration-color: #6b7280;
 }
 
 .markdown-body :deep(code) {
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
   font-size: 0.875em;
-  background: #f5f1ed;
+  background: #f8f9fa;
   padding: 0.2em 0.4em;
   border-radius: 3px;
-  border: 1px solid #e8e2db;
-  color: #6b5d54;
+  border: 1px solid #e5e7eb;
+  color: #374151;
 }
 
 .markdown-body :deep(pre) {
-  background: #2d2520;
-  color: #e8e2db;
+  background: #111827;
+  color: #e5e7eb;
   padding: 1.5rem;
   border-radius: 8px;
   overflow-x: auto;
   margin: 1.5rem 0;
-  border: 1px solid #3d3430;
+  border: 1px solid #1f2937;
 }
 
 .markdown-body :deep(pre code) {
@@ -574,12 +602,12 @@ useHead({
 }
 
 .markdown-body :deep(blockquote) {
-  border-left: 4px solid #8b7355;
+  border-left: 4px solid #6b7280;
   padding-left: 1.5rem;
   margin: 1.5rem 0;
-  color: #6b5d54;
+  color: #374151;
   font-style: italic;
-  background: #faf8f5;
+  background: #ffffff;
   padding: 1rem 1.5rem;
   border-radius: 0 6px 6px 0;
 }
@@ -611,15 +639,15 @@ useHead({
 
 .markdown-body :deep(table th),
 .markdown-body :deep(table td) {
-  border: 1px solid #e8e2db;
+  border: 1px solid #e5e7eb;
   padding: 0.75rem 1rem;
   text-align: left;
 }
 
 .markdown-body :deep(table th) {
-  background: #faf8f5;
+  background: #ffffff;
   font-weight: 600;
-  color: #3d3430;
+  color: #1f2937;
 }
 
 .markdown-body :deep(table td) {
@@ -629,7 +657,7 @@ useHead({
 .markdown-body :deep(hr) {
   border: none;
   height: 1px;
-  background: #e8e2db;
+  background: #e5e7eb;
   margin: 3rem 0;
 }
 </style>
