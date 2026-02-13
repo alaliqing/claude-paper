@@ -1,18 +1,21 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "claude-paper",
+  "description": "A plugin for studying research papers with automated material generation and code demonstrations",
   "owner": {
-    "name": "Claude Paper Team"
-  },
-  "metadata": {
-    "description": "A plugin for studying research papers with automated material generation and code demos",
-    "homepage": "https://github.com/alaliqing/claude-paper"
+    "name": "alaliqing"
   },
   "plugins": [
     {
       "name": "claude-paper",
       "version": "1.0.0",
+      "description": "A plugin for studying research papers with automated material generation, code demos, and a web viewer",
+      "author": {
+        "name": "alaliqing"
+      },
+      "category": "development",
       "source": "./plugin",
-      "description": "A plugin for studying research papers with automated material generation, code demos, and a web viewer"
+      "homepage": "https://github.com/alaliqing/claude-paper"
     }
   ]
 }

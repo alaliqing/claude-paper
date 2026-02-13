@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A plugin for studying research papers with automated material generation and code demos",
   "author": {
-    "name": "Claude Paper Team"
-  }
+    "name": "alaliqing"
+  },
+  "homepage": "https://github.com/alaliqing/claude-paper"
 }
