@@ -21,11 +21,6 @@
         </li>
       </ul>
     </div>
-
-    <div class="actions">
-      <VSCodeButton :path="paperPath(paper.slug)" @click.stop />
-      <span class="hint">Open study materials in VS Code</span>
-    </div>
   </NuxtLink>
 </template>
 
@@ -38,8 +33,6 @@ const props = defineProps({
     required: true
   }
 })
-
-const paperPath = (slug) => `~/claude-papers/papers/${slug}`
 
 const getRepoName = (url) => {
   const match = url.match(/github\.com\/(.+?)(?:\.git)?$/)
@@ -131,19 +124,5 @@ const getRepoName = (url) => {
 .external-icon {
   font-size: 0.75em;
   opacity: 0.7;
-}
-
-.actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e2e8f0;
-}
-
-.hint {
-  font-size: 0.85rem;
-  color: #718096;
 }
 </style>
