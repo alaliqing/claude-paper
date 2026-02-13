@@ -113,4 +113,4 @@ Update `~/claude-papers/index.json` with paper metadata.
 
 ## Step 7: Launch Web UI
 
-Invoke `/claude-paper-suite:webui` skill.
+Invoke `/claude-paper:webui` skill.

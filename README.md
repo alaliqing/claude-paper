@@ -1,4 +1,4 @@
-# Claude Paper Suite
+# Claude Paper
 
 A Claude Code plugin for studying research papers with automated material generation and code demonstrations.
 
@@ -15,13 +15,13 @@ A Claude Code plugin for studying research papers with automated material genera
 Install the plugin using Claude Code:
 
 ```bash
-claude plugin install claude-paper-suite
+claude plugin install claude-paper
 ```
 
 Or for development, use the plugin directory:
 
 ```bash
-claude --plugin-dir /path/to/claude-paper-suite/plugin
+claude --plugin-dir /path/to/claude-paper/plugin
 ```
 
 The plugin will automatically:
@@ -35,7 +35,7 @@ The plugin will automatically:
 ### Study a Paper
 
 ```bash
-/claude-paper-suite:study /path/to/paper.pdf
+/claude-paper:study /path/to/paper.pdf
 ```
 
 This will:
@@ -50,7 +50,7 @@ This will:
 ### Launch Web Viewer
 
 ```bash
-/claude-paper-suite:webui
+/claude-paper:webui
 ```
 
 Opens the web interface at http://localhost:5815 to browse all papers.
@@ -95,7 +95,7 @@ The plugin intelligently decides the number and type of materials based on paper
 ### Project Structure
 
 ```
-claude-paper-suite/
+claude-paper/
 ├── .claude-plugin/
 │   └── marketplace.json        # Marketplace catalog
 ├── plugin/                      # Plugin directory
@@ -132,8 +132,8 @@ npm run dev
 
 3. Test full workflow:
 ```bash
-claude --plugin-dir /path/to/claude-paper-suite/plugin
-/claude-paper-suite:study /path/to/paper.pdf
+claude --plugin-dir /path/to/claude-paper/plugin
+/claude-paper:study /path/to/paper.pdf
 ```
 
 ## Requirements

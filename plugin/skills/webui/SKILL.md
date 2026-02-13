@@ -1,6 +1,6 @@
 ---
 name: webui
-description: Start the Claude Paper Suite web viewer to browse and study papers
+description: Start the Claude Paper web viewer to browse and study papers
 disable-model-invocation: false
 allowed-tools: Bash
 ---

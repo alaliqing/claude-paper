@@ -2,7 +2,7 @@
   <div class="paper-list">
     <h2>Your Papers</h2>
     <div v-if="papers.length === 0" class="empty">
-      No papers yet. Use <code>/claude-paper-suite:study</code> to add papers.
+      No papers yet. Use <code>/claude-paper:study</code> to add papers.
     </div>
     <div v-else class="papers-grid">
       <div v-for="paper in papers" :key="paper.slug" class="paper-card">

@@ -1,15 +1,15 @@
 {
-  "name": "claude-paper-suite",
+  "name": "claude-paper",
   "owner": {
-    "name": "Claude Paper Suite Team"
+    "name": "Claude Paper Team"
   },
   "metadata": {
     "description": "A plugin for studying research papers with automated material generation and code demos",
-    "homepage": "https://github.com/yourusername/claude-paper-suite"
+    "homepage": "https://github.com/alaliqing/claude-paper"
   },
   "plugins": [
     {
-      "name": "claude-paper-suite",
+      "name": "claude-paper",
       "version": "1.0.0",
       "source": "./plugin",
       "description": "A plugin for studying research papers with automated material generation, code demos, and a web viewer"

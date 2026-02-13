@@ -1,8 +1,8 @@
 {
-  "name": "claude-paper-suite",
+  "name": "claude-paper",
   "version": "1.0.0",
   "description": "A plugin for studying research papers with automated material generation and code demos",
   "author": {
-    "name": "Claude Paper Suite Team"
+    "name": "Claude Paper Team"
   }
 }

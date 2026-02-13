@@ -7,7 +7,7 @@ INSTALLED_MARKER="$PLUGIN_ROOT/.installed"
 
 # Only run install if marker doesn't exist
 if [ ! -f "$INSTALLED_MARKER" ]; then
-  echo "Installing Claude Paper Suite..."
+  echo "Installing Claude Paper..."
 
   # Install root dependencies
   cd "$PLUGIN_ROOT"
