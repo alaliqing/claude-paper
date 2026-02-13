@@ -188,6 +188,8 @@ const loadFile = async (path: string) => {
       params: { path }
     })
 
+    console.log('File loaded:', { path, type: data.type, contentLength: data.content?.length, language: data.language })
+
     selectedFile.value = path
     fileType.value = data.type || 'markdown'
     fileContent.value = data.content || ''
@@ -195,6 +197,7 @@ const loadFile = async (path: string) => {
     fileUrl.value = data.url || ''
 
   } catch (e: any) {
+    console.error('Error loading file:', e)
     fileContent.value = `Error loading file: ${e.message}`
     fileType.value = 'text'
   } finally {
@@ -241,9 +244,13 @@ useHead({
 })
 </script>
 
+<style>
+/* Global styles for highlight.js - must be non-scoped */
+@import 'highlight.js/styles/github.css';
+</style>
+
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
-@import 'highlight.js/styles/github-dark.css';
 
 * {
   box-sizing: border-box;
@@ -546,7 +553,7 @@ useHead({
 
 /* Content Area */
 .content {
-  max-width: 840px;
+  max-width: 920px;
   margin: 0 auto;
   padding: 3rem;
   animation: fadeIn 0.4s ease;
@@ -776,6 +783,8 @@ useHead({
   border-radius: 0;
   max-height: calc(100vh - 200px);
   overflow: auto;
+  background: #ffffff !important;
+  padding: 1.5rem;
 }
 
 .code-viewer code {
