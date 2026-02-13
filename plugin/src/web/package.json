@@ -2,11 +2,15 @@
   "name": "claude-paper-web",
   "type": "module",
   "scripts": {
-    "dev": "vitepress dev --port 5815",
-    "build": "vitepress build"
+    "dev": "nuxt dev --port 5815",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview"
   },
   "dependencies": {
-    "vitepress": "^1.0.0"
+    "nuxt": "^3.14.0",
+    "@nuxt/content": "^2.13.0",
+    "marked": "^12.0.0"
   },
   "devDependencies": {
     "vue": "^3.4.0"

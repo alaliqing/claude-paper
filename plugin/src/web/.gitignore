@@ -1,6 +1,8 @@
 node_modules/
-.vitepress/cache/
-.vitepress/dist/
+.nuxt/
+.output/
+.vitepress/
+.vitepress.backup/
 *.log
 .DS_Store
 .installed

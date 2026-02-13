@@ -7,7 +7,7 @@ allowed-tools: Bash
 
 # Start Web UI
 
-This skill starts the VitePress development server for the paper viewer.
+This skill starts the Nuxt.js development server for the paper viewer.
 
 ## Step 1: Check and Install Dependencies (First Run Only)
 
@@ -27,7 +27,7 @@ fi
 lsof -i :5815 || echo "Port 5815 is available"
 ```
 
-## Step 3: Start VitePress dev server
+## Step 3: Start Nuxt.js dev server
 
 If port is available:
 ```bash
