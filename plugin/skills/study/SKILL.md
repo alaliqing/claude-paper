@@ -27,11 +27,13 @@ Check if dependencies are installed:
 if [ ! -f "${CLAUDE_PLUGIN_ROOT}/.installed" ]; then
   echo "First run - installing dependencies..."
   cd "${CLAUDE_PLUGIN_ROOT}"
-  npm install
+  timeout 300 npm install || exit 1
   touch "${CLAUDE_PLUGIN_ROOT}/.installed"
   echo "Dependencies installed!"
 fi
 ```
+
+**Important**: The `timeout 300` ensures npm install doesn't run indefinitely. If it fails, exit gracefully.
 
 ## Step 1: Parse PDF
 
@@ -43,6 +45,11 @@ node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/parse-pdf.js <pdf-path>
 The script outputs JSON with:
 - title, authors, abstract, content, githubLinks, codeLinks
 - Save this to `meta.json` in the paper directory
+
+**Copy the original PDF** to the paper directory for reference:
+```bash
+cp <pdf-path> ~/claude-papers/papers/{paper-slug}/paper.pdf
+```
 
 ## Step 2: Generate Learning Materials
 
@@ -72,11 +79,14 @@ Based on parsed data and your analysis, adaptively create the appropriate files.
 - Practical implications
 
 **method.md** (create only if methodology is complex)
+- Natural language descriptions of each component
 - Algorithm step-by-step
 - Architecture diagrams
 - Implementation details
-- Pseudocode
+- Pseudocode (balance code with explanatory text)
 - Parameter explanations
+
+Use a mix of explanatory paragraphs and code blocks rather than large continuous pseudocode sections. Explain the "why" before showing the "how".
 
 **qa.md** - Self-assessment questions
 Generate 15 questions (5 basic, 5 intermediate, 5 advanced)
@@ -85,9 +95,9 @@ Generate 15 questions (5 basic, 5 intermediate, 5 advanced)
 
 Claude will adaptively create the appropriate code files based on the paper's needs. Possibilities include:
 
-- `code-demo.py` - Clean, well-commented reference implementation
-- `code-demo.ipynb` - Interactive notebook for exploration
-- Additional specialized files as needed for complex papers
+- `code/code-demo.py` - Clean, well-commented reference implementation
+- `code/code-demo.ipynb` - Interactive notebook for exploration
+- Additional specialized files in `code/` folder for complex papers
 
 Key principles for code files:
 - **Self-contained** - Each file should be runnable independently
@@ -97,19 +107,26 @@ Key principles for code files:
   - `.py` files: Clean reference implementations for studying
   - `.ipynb` files: Interactive exploration and visualization
 
+Git clone original code to `code/original-code/` if GitHub link is available.
+
 ## Step 4: Extract and Include Original Code
 
 If the paper includes original code (GitHub link, arXiv code, etc.):
 
 1. **Detect code availability** - Check meta.json for githubLinks and codeLinks
 2. **Clone/download original code** - Download to `code/original-code/`
-3. **Create README.md** in `code/original-code/`:
-   - Source URL
-   - Installation instructions
-   - How to run the original code
-   - Key files to look at
-4. **Preserve structure** - Keep original code organization
-5. **Add notes** - Document any setup requirements
+
+**Try git clone with proper checks**:
+```bash
+# Check if git is available and url is valid
+if command -v git &> /dev/null && [ -n "$GITHUB_URL" ]; then
+  cd ~/claude-papers/papers/{paper-slug}/code
+  git clone "$GITHUB_URL" original-code || echo "Git clone failed, continuing without original code"
+fi
+```
+
+3. **Preserve structure** - Keep original code organization
+4. **Add notes** - Document any setup requirements if needed
 
 ## Step 5: Extract Key Images
 
@@ -118,7 +135,16 @@ Extract only the most important figures (3-4 max):
 pdftoppm -f 1 -l 3 -png paper.pdf images/figure
 ```
 
-Rename descriptively.
+**Check if pdftoppm is available first**:
+```bash
+if command -v pdftoppm &> /dev/null; then
+  pdftoppm -f 1 -l 3 -png paper.pdf images/figure
+else
+  echo "pdftoppm not installed, skipping figure extraction"
+fi
+```
+
+Rename descriptively. If pdftoppm is not available, continue without figures.
 
 ## Step 6: Update Index
 
