@@ -124,6 +124,23 @@ Rename descriptively.
 
 Update `~/claude-papers/index.json` with paper metadata.
 
+Add an entry with the following structure:
+```json
+{
+  "id": "paper-slug",
+  "title": "Paper Title",
+  "slug": "paper-slug",
+  "authors": ["Author 1", "Author 2"],
+  "abstract": "Paper abstract...",
+  "year": 2024,
+  "date": "2024-01-01",
+  "githubLinks": ["https://github.com/..."],
+  "codeLinks": ["https://..."]
+}
+```
+
+The index.json should have structure: `{"papers": [...]}`
+
 ## Step 7: Launch Web UI
 
 Invoke `/claude-paper:webui` skill.

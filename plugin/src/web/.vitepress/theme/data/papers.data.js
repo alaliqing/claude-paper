@@ -8,7 +8,9 @@ export default {
     const indexPath = path.join(homedir(), 'claude-papers/index.json')
     if (fs.existsSync(indexPath)) {
       const content = fs.readFileSync(indexPath, 'utf-8')
-      return JSON.parse(content)
+      const data = JSON.parse(content)
+      // Handle both flat array and {papers: [...]} structure
+      return Array.isArray(data) ? data : (data.papers || [])
     }
     return []
   }
