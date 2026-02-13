@@ -78,6 +78,15 @@
             <div v-if="fileLoading" class="file-loading">
               <div class="shimmer"></div>
             </div>
+            <div v-else-if="fileType === 'image'" class="file-viewer image-viewer">
+              <img :src="fileUrl" :alt="selectedFile" />
+            </div>
+            <div v-else-if="fileType === 'pdf'" class="file-viewer pdf-viewer">
+              <iframe :src="fileUrl" frameborder="0"></iframe>
+            </div>
+            <div v-else-if="fileType === 'code'" class="file-viewer code-viewer">
+              <pre><code :class="`language-${fileLanguage}`" v-html="highlightedCode"></code></pre>
+            </div>
             <div v-else-if="fileContent" v-html="renderedContent" class="markdown-body"></div>
             <div v-else class="empty-state">
               <p>No content available</p>
@@ -91,6 +100,36 @@
 
 <script setup lang="ts">
 import { marked } from 'marked'
+import hljs from 'highlight.js/lib/core'
+// Import common languages
+import python from 'highlight.js/lib/languages/python'
+import javascript from 'highlight.js/lib/languages/javascript'
+import typescript from 'highlight.js/lib/languages/typescript'
+import java from 'highlight.js/lib/languages/java'
+import cpp from 'highlight.js/lib/languages/cpp'
+import go from 'highlight.js/lib/languages/go'
+import rust from 'highlight.js/lib/languages/rust'
+import bash from 'highlight.js/lib/languages/bash'
+import json from 'highlight.js/lib/languages/json'
+import yaml from 'highlight.js/lib/languages/yaml'
+import xml from 'highlight.js/lib/languages/xml'
+import css from 'highlight.js/lib/languages/css'
+import sql from 'highlight.js/lib/languages/sql'
+
+// Register languages
+hljs.registerLanguage('python', python)
+hljs.registerLanguage('javascript', javascript)
+hljs.registerLanguage('typescript', typescript)
+hljs.registerLanguage('java', java)
+hljs.registerLanguage('cpp', cpp)
+hljs.registerLanguage('go', go)
+hljs.registerLanguage('rust', rust)
+hljs.registerLanguage('bash', bash)
+hljs.registerLanguage('json', json)
+hljs.registerLanguage('yaml', yaml)
+hljs.registerLanguage('xml', xml)
+hljs.registerLanguage('css', css)
+hljs.registerLanguage('sql', sql)
 
 const route = useRoute()
 const slug = route.params.slug as string
@@ -105,6 +144,9 @@ const paper = ref(null)
 const fileTree = ref([])
 const selectedFile = ref('README.md')
 const fileContent = ref('')
+const fileType = ref('markdown')
+const fileLanguage = ref('plaintext')
+const fileUrl = ref('')
 const fileLoading = ref(false)
 
 // UI state
@@ -145,10 +187,16 @@ const loadFile = async (path: string) => {
     const data = await $fetch(`/api/papers/${slug}/file`, {
       params: { path }
     })
-    fileContent.value = data.content
+
     selectedFile.value = path
+    fileType.value = data.type || 'markdown'
+    fileContent.value = data.content || ''
+    fileLanguage.value = data.language || 'plaintext'
+    fileUrl.value = data.url || ''
+
   } catch (e: any) {
     fileContent.value = `Error loading file: ${e.message}`
+    fileType.value = 'text'
   } finally {
     fileLoading.value = false
   }
@@ -162,9 +210,28 @@ const toggleSidebar = () => {
   sidebarCollapsed.value = !sidebarCollapsed.value
 }
 
+const highlightedCode = computed(() => {
+  if (!fileContent.value || fileType.value !== 'code') return ''
+
+  try {
+    return hljs.highlight(fileContent.value, {
+      language: fileLanguage.value
+    }).value
+  } catch (e) {
+    // If language not supported, return plain text
+    return hljs.highlight(fileContent.value, { language: 'plaintext' }).value
+  }
+})
+
 const renderedContent = computed(() => {
   if (!fileContent.value) return ''
-  return marked.parse(fileContent.value)
+  if (fileType.value === 'markdown') {
+    return marked.parse(fileContent.value)
+  }
+  if (fileType.value === 'text') {
+    return `<pre>${fileContent.value}</pre>`
+  }
+  return fileContent.value
 })
 
 const paperPath = computed(() => `~/claude-papers/papers/${slug}`)
@@ -176,6 +243,7 @@ useHead({
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
+@import 'highlight.js/styles/github-dark.css';
 
 * {
   box-sizing: border-box;
@@ -583,7 +651,7 @@ useHead({
 
 .markdown-body :deep(code) {
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
-  font-size: 0.875em;
+  font-size: 0.8em;
   background: #f8f9fa;
   padding: 0.2em 0.4em;
   border-radius: 3px;
@@ -599,6 +667,8 @@ useHead({
   overflow-x: auto;
   margin: 1.5rem 0;
   border: 1px solid #1f2937;
+  font-size: 0.875rem;
+  line-height: 1.6;
 }
 
 .markdown-body :deep(pre code) {
@@ -606,6 +676,7 @@ useHead({
   border: none;
   color: inherit;
   padding: 0;
+  font-size: 0.875rem;
 }
 
 .markdown-body :deep(blockquote) {
@@ -666,5 +737,49 @@ useHead({
   height: 1px;
   background: #e5e7eb;
   margin: 3rem 0;
+}
+
+/* File Viewers */
+.file-viewer {
+  width: 100%;
+}
+
+.image-viewer {
+  text-align: center;
+  padding: 2rem;
+}
+
+.image-viewer img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.pdf-viewer {
+  height: calc(100vh - 200px);
+  min-height: 600px;
+}
+
+.pdf-viewer iframe {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+
+.code-viewer {
+  margin: 0;
+}
+
+.code-viewer pre {
+  margin: 0;
+  border-radius: 0;
+  max-height: calc(100vh - 200px);
+  overflow: auto;
+}
+
+.code-viewer code {
+  font-size: 0.875rem;
+  line-height: 1.6;
 }
 </style>

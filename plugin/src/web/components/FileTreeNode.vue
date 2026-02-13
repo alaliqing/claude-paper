@@ -43,7 +43,7 @@ const emit = defineEmits<{
   select: [path: string]
 }>()
 
-const expanded = ref(true) // Start expanded by default
+const expanded = ref(false) // Start collapsed by default
 
 const isDirectory = computed(() => props.node.type === 'directory')
 const isSelected = computed(() => props.node.path === props.selectedPath)
