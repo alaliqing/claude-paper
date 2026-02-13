@@ -20,6 +20,19 @@ Think like an excellent teacher explaining the paper to a smart colleague. Let C
 3. **Focus on understanding** - Prioritize conceptual clarity
 4. **Adapt to paper complexity** - Claude will decide the appropriate number and type of files based on the paper's complexity and needs
 
+## Step 0: Check Dependencies (First Run Only)
+
+Check if dependencies are installed:
+```bash
+if [ ! -f "${CLAUDE_PLUGIN_ROOT}/.installed" ]; then
+  echo "First run - installing dependencies..."
+  cd "${CLAUDE_PLUGIN_ROOT}"
+  npm install
+  touch "${CLAUDE_PLUGIN_ROOT}/.installed"
+  echo "Dependencies installed!"
+fi
+```
+
 ## Step 1: Parse PDF
 
 Run the PDF parser script to extract structured information:
