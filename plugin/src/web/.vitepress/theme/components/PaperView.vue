@@ -1,11 +1,10 @@
 <template>
   <div class="paper-view">
-    <div v-if="loading">Loading paper...</div>
-    <div v-else-if="error" class="error">{{ error }}</div>
+    <div v-if="!paper" class="error">Paper not found</div>
     <div v-else>
       <div class="paper-header">
         <h1>{{ paper.title }}</h1>
-        <p class="authors">{{ paper.authors.join(', ') }}</p>
+        <p class="authors">{{ paper.authors?.join(', ') || 'Unknown authors' }}</p>
         <VSCodeButton :path="paperPath" />
       </div>
 
@@ -17,10 +16,15 @@
 
         <section class="materials">
           <h2>Study Materials</h2>
+          <p class="info">Open in VS Code to access all generated study materials including:</p>
           <ul>
-            <li v-for="material in materials" :key="material.name">
-              <a :href="material.url">{{ material.name }}</a>
-            </li>
+            <li>📄 README.md - Quick navigation guide</li>
+            <li>📝 summary.md - Comprehensive summary</li>
+            <li>💡 insights.md - Deep dive into core ideas</li>
+            <li>🔬 method.md - Methodology details (if complex)</li>
+            <li>❓ qa.md - Learning questions</li>
+            <li>💻 code/ - Code demonstrations</li>
+            <li>🖼️ images/ - Key figures</li>
           </ul>
         </section>
 
@@ -41,39 +45,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useRoute } from 'vitepress'
+import { data as papers } from '../data/papers.data.js'
 import VSCodeButton from './VSCodeButton.vue'
 
 const route = useRoute()
-const paper = ref({})
-const loading = ref(true)
-const error = ref(null)
-
 const paperSlug = computed(() => route.params.slug)
+const paper = computed(() => papers.find(p => p.slug === paperSlug.value))
 const paperPath = computed(() => `~/claude-papers/papers/${paperSlug.value}`)
-
-const materials = computed(() => {
-  const items = []
-  if (paper.value.hasReadme) items.push({ name: 'README', url: `/materials/${paperSlug.value}/README.md` })
-  if (paper.value.hasSummary) items.push({ name: 'Summary', url: `/materials/${paperSlug.value}/summary.md` })
-  if (paper.value.hasInsights) items.push({ name: 'Insights', url: `/materials/${paperSlug.value}/insights.md` })
-  if (paper.value.hasMethod) items.push({ name: 'Method', url: `/materials/${paperSlug.value}/method.md` })
-  if (paper.value.hasQA) items.push({ name: 'Q&A', url: `/materials/${paperSlug.value}/qa.md` })
-  return items
-})
-
-onMounted(async () => {
-  try {
-    const response = await fetch(`/api/papers/${paperSlug.value}`)
-    if (!response.ok) throw new Error('Failed to load paper')
-    paper.value = await response.json()
-  } catch (e) {
-    error.value = e.message
-  } finally {
-    loading.value = false
-  }
-})
 </script>
 
 <style scoped>

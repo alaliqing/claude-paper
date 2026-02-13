@@ -1,9 +1,7 @@
 <template>
   <div class="paper-list">
     <h2>Your Papers</h2>
-    <div v-if="loading">Loading papers...</div>
-    <div v-else-if="error" class="error">{{ error }}</div>
-    <div v-else-if="papers.length === 0" class="empty">
+    <div v-if="papers.length === 0" class="empty">
       No papers yet. Use <code>/claude-paper-suite:study</code> to add papers.
     </div>
     <div v-else class="papers-grid">
@@ -21,26 +19,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { data as papers } from '../data/papers.data.js'
 import VSCodeButton from './VSCodeButton.vue'
 
-const papers = ref([])
-const loading = ref(true)
-const error = ref(null)
-
 const paperPath = (slug) => `~/claude-papers/papers/${slug}`
-
-onMounted(async () => {
-  try {
-    const response = await fetch('/api/papers')
-    if (!response.ok) throw new Error('Failed to load papers')
-    papers.value = await response.json()
-  } catch (e) {
-    error.value = e.message
-  } finally {
-    loading.value = false
-  }
-})
 </script>
 
 <style scoped>
