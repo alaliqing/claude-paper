@@ -1,0 +1,13 @@
+{
+  "name": "claude-paper-suite",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "install": "npm install",
+    "dev:web": "cd src/web && npm run dev",
+    "build:web": "cd src/web && npm run build"
+  },
+  "dependencies": {
+    "pdf-parse": "^1.1.1"
+  }
+}

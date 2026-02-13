@@ -1,0 +1,14 @@
+{
+  "name": "claude-paper-web",
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev --port 5815",
+    "build": "vitepress build"
+  },
+  "dependencies": {
+    "vitepress": "^1.0.0"
+  },
+  "devDependencies": {
+    "vue": "^3.4.0"
+  }
+}
