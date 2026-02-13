@@ -27,13 +27,13 @@ Check if dependencies are installed:
 if [ ! -f "${CLAUDE_PLUGIN_ROOT}/.installed" ]; then
   echo "First run - installing dependencies..."
   cd "${CLAUDE_PLUGIN_ROOT}"
-  timeout 300 npm install || exit 1
+  npm install || exit 1
   touch "${CLAUDE_PLUGIN_ROOT}/.installed"
   echo "Dependencies installed!"
 fi
 ```
 
-**Important**: The `timeout 300` ensures npm install doesn't run indefinitely. If it fails, exit gracefully.
+**Note**: On macOS, if you need to limit npm install time, use `gtimeout` (from coreutils) or run without timeout as install is typically fast.
 
 ## Step 1: Parse PDF
 
@@ -54,6 +54,8 @@ cp <pdf-path> ~/claude-papers/papers/{paper-slug}/paper.pdf
 ## Step 2: Generate Learning Materials
 
 Create a paper directory: `~/claude-papers/papers/{paper-slug}/`
+
+**Important: Use the user's input language** for all generated materials, especially when the user specifies a language (e.g., if they ask in Chinese, generate materials in Chinese).
 
 Based on parsed data and your analysis, adaptively create the appropriate files. Claude will decide the number and complexity based on the paper.
 
@@ -78,6 +80,8 @@ Based on parsed data and your analysis, adaptively create the appropriate files.
 - Limitations and assumptions
 - Practical implications
 
+**Note:** You can use LaTeX-style math equations in markdown files when needed for clarity (e.g., $L = \sum_{i} \omega_i L_i$ or use inline `$$` or display math).
+
 **method.md** (create only if methodology is complex)
 - Natural language descriptions of each component
 - Algorithm step-by-step
@@ -89,15 +93,34 @@ Based on parsed data and your analysis, adaptively create the appropriate files.
 Use a mix of explanatory paragraphs and code blocks rather than large continuous pseudocode sections. Explain the "why" before showing the "how".
 
 **qa.md** - Self-assessment questions
-Generate 15 questions (5 basic, 5 intermediate, 5 advanced)
+
+Generate 15 questions (5 basic, 5 intermediate, 5 advanced) using the **details/summary style** for Q&A:
+
+```markdown
+### Question title
+
+<details>
+<summary>Answer</summary>
+
+Detailed answer content here with proper indentation.
+
+</details>
+```
+
+Each answer should be properly indented within the `<details>` block. Use horizontal rules (`---`) between questions for better readability.
 
 ## Step 3: Generate Code Demonstrations
 
 Claude will adaptively create the appropriate code files based on the paper's needs. Possibilities include:
 
-- `code/code-demo.py` - Clean, well-commented reference implementation
-- `code/code-demo.ipynb` - Interactive notebook for exploration
+- `code/{descriptive_name}.py` - Clean, well-commented reference implementation (e.g., `vad_architecture.py`, `vectorized_planning.py`)
+- `code/{descriptive_name}.ipynb` - Interactive notebook for exploration
 - Additional specialized files in `code/` folder for complex papers
+
+**Guidelines for code file naming:**
+- Choose names that reflect the paper's contribution (e.g., `{model_name}_demo.py`, `{key_concept}_implementation.py`)
+- Keep it concise but descriptive
+- Avoid generic names like `code-demo.py`
 
 Key principles for code files:
 - **Self-contained** - Each file should be runnable independently
