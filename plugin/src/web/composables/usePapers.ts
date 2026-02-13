@@ -1,7 +1,3 @@
-import fs from 'fs'
-import path from 'path'
-import { homedir } from 'os'
-
 export interface Paper {
   title: string
   slug: string
@@ -23,18 +19,8 @@ export const usePapers = () => {
     error.value = null
 
     try {
-      const indexPath = path.join(homedir(), 'claude-papers/index.json')
-
-      if (!fs.existsSync(indexPath)) {
-        papers.value = []
-        return
-      }
-
-      const content = fs.readFileSync(indexPath, 'utf-8')
-      const data = JSON.parse(content)
-
-      // Handle both flat array and {papers: [...]} structure
-      papers.value = Array.isArray(data) ? data : (data.papers || [])
+      const data = await $fetch<Paper[]>('/api/papers')
+      papers.value = data
     } catch (e: any) {
       error.value = e.message || 'Failed to load papers'
       papers.value = []
@@ -47,16 +33,10 @@ export const usePapers = () => {
     return papers.value.find(p => p.slug === slug) || null
   }
 
-  const getPaperMarkdown = (slug: string): string | null => {
+  const getPaperMarkdown = async (slug: string): Promise<string | null> => {
     try {
-      const paperDir = path.join(homedir(), 'claude-papers/papers', slug)
-      const readmePath = path.join(paperDir, 'README.md')
-
-      if (!fs.existsSync(readmePath)) {
-        return null
-      }
-
-      return fs.readFileSync(readmePath, 'utf-8')
+      const data = await $fetch<{ slug: string; markdown: string }>(`/api/papers/${slug}`)
+      return data.markdown
     } catch (e) {
       return null
     }
