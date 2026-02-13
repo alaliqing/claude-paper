@@ -40,25 +40,27 @@
       <div class="main-content">
         <!-- Sidebar File Tree -->
         <aside class="sidebar" :class="{ collapsed: sidebarCollapsed }">
-          <div v-if="!sidebarCollapsed" class="sidebar-header">
-            <h3>Study Materials</h3>
-            <button @click="toggleSidebar" class="collapse-btn" title="Collapse">
-              ←
+          <div class="sidebar-inner">
+            <div v-if="!sidebarCollapsed" class="sidebar-header">
+              <h3>Study Materials</h3>
+              <button @click="toggleSidebar" class="collapse-btn" title="Collapse">
+                ←
+              </button>
+            </div>
+
+            <button v-else @click="toggleSidebar" class="expand-btn" title="Expand">
+              →
             </button>
-          </div>
 
-          <button v-else @click="toggleSidebar" class="expand-btn" title="Expand">
-            →
-          </button>
-
-          <div v-if="!sidebarCollapsed" class="file-tree">
-            <FileTreeNode
-              v-for="node in fileTree"
-              :key="node.path"
-              :node="node"
-              :selected-path="selectedFile"
-              @select="selectFile"
-            />
+            <div v-if="!sidebarCollapsed" class="file-tree">
+              <FileTreeNode
+                v-for="node in fileTree"
+                :key="node.path"
+                :node="node"
+                :selected-path="selectedFile"
+                @select="selectFile"
+              />
+            </div>
           </div>
         </aside>
 
@@ -358,12 +360,11 @@ useHead({
   width: 280px;
   background: #ffffff;
   border-right: 1px solid #e5e7eb;
-  overflow-y: auto;
-  transition: width 0.3s ease, opacity 0.3s ease;
+  transition: width 0.3s ease;
   position: sticky;
   top: 64px;
   height: calc(100vh - 64px);
-  position: relative;
+  align-self: flex-start;
 }
 
 .sidebar.collapsed {
@@ -372,6 +373,12 @@ useHead({
 
 .sidebar.collapsed .file-tree {
   display: none;
+}
+
+.sidebar-inner {
+  height: 100%;
+  overflow-y: auto;
+  position: relative;
 }
 
 .sidebar-header {
