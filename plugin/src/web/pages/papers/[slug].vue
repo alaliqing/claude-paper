@@ -18,9 +18,9 @@
     <div v-else class="reader">
       <!-- Top Navigation Bar -->
       <nav class="top-bar">
-        <NuxtLink to="/" class="logo">
-          <span class="logo-icon">◈</span>
-          <span class="logo-text">Research Library</span>
+        <NuxtLink to="/" class="back-to-library">
+          <span class="back-arrow">←</span>
+          <span class="back-text">Library</span>
         </NuxtLink>
 
         <div class="paper-title-nav">
@@ -268,24 +268,32 @@ useHead({
   background: rgba(255, 255, 255, 0.95);
 }
 
-.logo {
+.back-to-library {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   text-decoration: none;
   color: #3d3430;
-  font-weight: 600;
+  font-weight: 500;
   white-space: nowrap;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
 }
 
-.logo-icon {
-  font-size: 1.25rem;
+.back-to-library:hover {
+  background: #f5f1ed;
   color: #8b7355;
 }
 
-.logo-text {
+.back-arrow {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.back-text {
   font-size: 0.95rem;
-  letter-spacing: 0.01em;
 }
 
 .paper-title-nav {
