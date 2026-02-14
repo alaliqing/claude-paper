@@ -160,21 +160,23 @@ fi
 
 ## Step 5: Extract Key Images
 
-Extract only the most important figures (3-4 max):
+Extract images from the PDF using Python:
 ```bash
-pdftoppm -f 1 -l 3 -png paper.pdf images/figure
+# Create images directory first
+mkdir -p ~/claude-papers/papers/{paper-slug}/images
+
+# Extract embedded images and page previews
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/extract-images.py \
+  paper.pdf \
+  ~/claude-papers/papers/{paper-slug}/images
 ```
 
-**Check if pdftoppm is available first**:
-```bash
-if command -v pdftoppm &> /dev/null; then
-  pdftoppm -f 1 -l 3 -png paper.pdf images/figure
-else
-  echo "pdftoppm not installed, skipping figure extraction"
-fi
-```
+This script will:
+- Extract embedded images from the PDF
+- If few images are found, generate page previews for the first 3 pages
+- Save images with descriptive names like `page_1_img_1.png`, `page_1_preview.png`
 
-Rename descriptively. If pdftoppm is not available, continue without figures.
+Rename descriptively if needed (e.g., `architecture.png`, `results.png`).
 
 ## Step 6: Update Index
 
