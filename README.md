@@ -35,7 +35,7 @@ Install from the Claude Code marketplace:
 
 ```bash
 # Add the marketplace
-/plugin marketplace add qinjing/claude-paper
+/plugin marketplace add alaliqing/claude-paper
 
 # Install the plugin
 /plugin install claude-paper
