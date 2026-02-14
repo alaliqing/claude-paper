@@ -10,7 +10,9 @@
   "dependencies": {
     "@nuxt/content": "^2.13.0",
     "highlight.js": "^11.11.1",
+    "katex": "^0.16.28",
     "marked": "^12.0.0",
+    "marked-katex-extension": "^5.1.6",
     "nuxt": "^3.14.0"
   },
   "devDependencies": {

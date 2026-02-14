@@ -100,6 +100,7 @@
 
 <script setup lang="ts">
 import { marked } from 'marked'
+import markedKatex from 'marked-katex-extension'
 import hljs from 'highlight.js/lib/core'
 // Import common languages
 import python from 'highlight.js/lib/languages/python'
@@ -130,6 +131,12 @@ hljs.registerLanguage('yaml', yaml)
 hljs.registerLanguage('xml', xml)
 hljs.registerLanguage('css', css)
 hljs.registerLanguage('sql', sql)
+
+// Configure marked with KaTeX extension
+marked.use(markedKatex({
+  throwOnError: false,
+  output: 'html'
+}))
 
 const route = useRoute()
 const slug = route.params.slug as string
@@ -247,6 +254,8 @@ useHead({
 <style>
 /* Global styles for highlight.js - must be non-scoped */
 @import 'highlight.js/styles/github.css';
+/* KaTeX styles for math rendering */
+@import 'katex/dist/katex.min.css';
 </style>
 
 <style scoped>

@@ -1,0 +1,12 @@
+{
+  "name": "claude-paper",
+  "version": "1.0.0",
+  "description": "Research paper study companion - download, organize, and study academic papers with AI-powered tools",
+  "skills": [
+    {
+      "name": "webui",
+      "path": "skills/webui/SKILL.md",
+      "description": "Start the web viewer to browse and study papers"
+    }
+  ]
+}
