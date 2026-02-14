@@ -17,25 +17,13 @@ A powerful **Claude Code plugin** that automates research paper study through in
 
 ## Features
 
-### Intelligent Paper Processing
 - **Automatic PDF parsing** - Extract title, authors, abstract, and full content
 - **Smart content truncation** - Handles large papers (50k char limit) intelligently
 - **Code repository detection** - Automatically finds GitHub, arXiv, CodeOcean links
-
-### Adaptive Learning Materials
-Generate comprehensive study resources tailored to paper complexity:
-- **Core materials** (always included): README, summary, insights, and progressive Q&A (15 questions)
-- **Adaptive materials** (when needed): method.md for complex methodologies, mental-model.md for categorization, reflection.md for extensions
-
-### Code Demonstrations
-- **Runnable demos** - Clean, well-commented implementations
-- **Jupyter notebooks** - Interactive .ipynb files for hands-on learning
-- **Original code integration** - Automatically clones and includes paper's GitHub code when available
-
-### Web Viewer
-- **Nuxt.js-powered interface** - Modern, responsive web application at http://localhost:5815
-- **Math rendering** - KaTeX support for mathematical equations
-- **Paper cards** - Visual overview with metadata and code links
+- **Adaptive learning materials** - Generates README, summary, insights, Q&A based on paper complexity
+- **Code demonstrations** - Clean implementations with Jupyter notebooks and original code integration
+- **Interactive web viewer** - Nuxt.js interface with math equation support (KaTeX)
+- **Intelligent assessment** - Difficulty levels and paper type detection for adaptive content generation
 
 ---
 
@@ -136,30 +124,6 @@ Papers are organized in `~/claude-papers/papers/{paper-slug}/`:
 │
 └── index.json                           # Global search index
 ```
-
----
-
-## Adaptive Generation System
-
-Claude Paper uses an intelligent **adaptive generation system** that creates materials based on paper complexity:
-
-### Paper Difficulty Assessment
-- **Beginner** - Accessible introduction, minimal prerequisites
-- **Intermediate** - Requires some background knowledge
-- **Advanced** - Assumes familiarity with the field
-- **Highly Theoretical** - Heavy mathematical/formal content
-
-### Paper Type Detection
-- **Theoretical** - Focus on mathematical proofs and formalism
-- **Architecture-based** - System design and implementation
-- **Empirical-heavy** - Experimental results and datasets
-- **Survey/Review** - Comprehensive overview of a field
-
-### Content Adaptation
-- **Simple papers** → Core materials only (README, summary, insights, Q&A)
-- **Complex methodologies** → + method.md with detailed explanations
-- **Novel frameworks** → + mental-model.md for positioning
-- **Breakthrough work** → + reflection.md for extensions
 
 ---
 
