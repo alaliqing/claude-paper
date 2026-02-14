@@ -30,6 +30,10 @@ if [ ! -f "${CLAUDE_PLUGIN_ROOT}/.installed" ]; then
   echo "First run - installing dependencies..."
   cd "${CLAUDE_PLUGIN_ROOT}"
   npm install || exit 1
+
+  # Install Python dependencies for image extraction
+  python3 -m pip install pymupdf --user 2>/dev/null || pip3 install pymupdf --user 2>/dev/null || echo "Warning: Failed to install pymupdf"
+
   touch "${CLAUDE_PLUGIN_ROOT}/.installed"
   echo "Dependencies installed!"
 fi
@@ -38,6 +42,7 @@ fi
 Recommended:
 
 * Node >= 18
+* Python 3 with pip (for image extraction)
 
 ---
 
@@ -221,6 +226,17 @@ Include:
 
 At least one runnable demo must be created.
 
+**All code demos must be placed in:**
+```
+~/claude-papers/papers/{paper-slug}/code/
+```
+
+Create the code directory first:
+
+```bash
+mkdir -p ~/claude-papers/papers/{paper-slug}/code
+```
+
 Guidelines:
 
 * Self-contained
@@ -246,22 +262,7 @@ Avoid generic names.
 
 ---
 
-# Step 5: Extract Original Code (If Available)
-
-If GitHub link exists:
-
-```bash
-if command -v git &> /dev/null && [ -n "$GITHUB_URL" ]; then
-  cd ~/claude-papers/papers/{paper-slug}/code
-  git clone --depth 1 "$GITHUB_URL" original-code || echo "Clone failed"
-fi
-```
-
-Preserve original structure.
-
----
-
-# Step 6: Extract Images
+# Step 5: Extract Images
 
 ```bash
 mkdir -p ~/claude-papers/papers/{paper-slug}/images
@@ -279,7 +280,7 @@ Rename key images descriptively:
 
 ---
 
-# Step 7: Update Index
+# Step 6: Update Index
 
 If index.json does not exist, create:
 
@@ -306,7 +307,7 @@ Add entry:
 ---
 
 
-# Step 8: Relaunch Web UI
+# Step 7: Relaunch Web UI
 
 Invoke:
 
@@ -315,7 +316,7 @@ Invoke:
 ```
 
 
-# Step 9: Interactive Deep Learning Loop
+# Step 8: Interactive Deep Learning Loop
 
 After all files are generated:
 
