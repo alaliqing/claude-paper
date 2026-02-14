@@ -7,7 +7,7 @@ allowed-tools: Bash
 
 # Start Web UI
 
-This skill starts the Nuxt.js development server for the paper viewer.
+This skill starts the Claude Paper web viewer using the production Nuxt.js server.
 
 ## Step 1: Check and Install Dependencies (First Run Only)
 
@@ -21,22 +21,81 @@ if [ ! -f "${CLAUDE_PLUGIN_ROOT}/src/web/node_modules/.package-lock.json" ]; the
 fi
 ```
 
-## Step 2: Check if server is already running
+## Step 2: Build Production Server
 
-```bash
-lsof -i :5815 || echo "Port 5815 is available"
-```
-
-## Step 3: Start Nuxt.js dev server
-
-If port is available:
+Build if needed or if build is stale:
 ```bash
 cd ${CLAUDE_PLUGIN_ROOT}/src/web
-npm run dev
+
+if [ ! -f ".output/server/index.mjs" ] || [ ! -f ".output/server/package.json" ]; then
+  echo "Building production server..."
+  npm run build
+  echo "Build complete!"
+else
+  echo "Production build already exists"
+fi
 ```
 
-The server will start at http://localhost:5815
+## Step 3: Check Port Availability
 
-## Step 4: Inform user
+Ensure port 5815 is available:
+```bash
+if lsof -i :5815 > /dev/null 2>&1; then
+  echo "INFO: Port 5815 is already in use"
+  PID_FILE="/tmp/claude-paper-webui.pid"
+  if [ -f "$PID_FILE" ] && kill -0 $(cat "$PID_FILE") 2>/dev/null; then
+    echo "Claude Paper web UI appears to be running"
+    echo "Access it at: http://localhost:5815"
+    exit 0
+  else
+    echo "ERROR: Port 5815 is occupied by another process"
+    exit 1
+  fi
+fi
+```
 
-Tell the user the web viewer is available at http://localhost:5815
+## Step 4: Start Production Server
+
+Start the server in background:
+```bash
+PORT=5815 node .output/server/index.mjs &
+SERVER_PID=$!
+
+# Save PID for later cleanup
+echo $SERVER_PID > /tmp/claude-paper-webui.pid
+echo "Server PID: $SERVER_PID"
+```
+
+## Step 5: Verify Server Health
+
+Wait for server to be ready:
+```bash
+timeout=10
+while [ $timeout -gt 0 ]; do
+  if curl -s http://localhost:5815/api/papers > /dev/null 2>&1; then
+    echo "Server is ready!"
+    break
+  fi
+  sleep 1
+  timeout=$((timeout - 1))
+done
+
+if [ $timeout -eq 0 ]; then
+  echo "ERROR: Server failed to start properly"
+  kill $SERVER_PID 2>/dev/null
+  rm -f /tmp/claude-paper-webui.pid
+  exit 1
+fi
+```
+
+## Step 6: Inform User
+
+Tell the user the web viewer is available and provide cleanup instructions:
+```
+Claude Paper web UI is now running!
+
+Access it at: http://localhost:5815
+
+To stop the server, run:
+  kill $(cat /tmp/claude-paper-webui.pid)
+```
