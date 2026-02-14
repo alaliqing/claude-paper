@@ -10,11 +10,21 @@ Start the Claude Paper web viewer using the production Nuxt.js server.
 ### Step 1: Check and Install Dependencies (First Run Only)
 
 ```bash
-if [ ! -f "${CLAUDE_PLUGIN_ROOT}/src/web/node_modules/.package-lock.json" ]; then
-  echo "First run - installing web dependencies..."
-  cd "${CLAUDE_PLUGIN_ROOT}/src/web"
-  npm install
-  echo "Web dependencies installed!"
+if [ ! -f "${CLAUDE_PLUGIN_ROOT}/src/web/node_modules/.package-lock.json" ] || [ ! -d "${CLAUDE_PLUGIN_ROOT}/src/web/node_modules/@nuxt" ]; then
+  if [ ! -d "${CLAUDE_PLUGIN_ROOT}/src/web/node_modules/@nuxt" ]; then
+    echo "ERROR: node_modules is corrupted, performing clean install..."
+    cd "${CLAUDE_PLUGIN_ROOT}/src/web"
+    rm -rf node_modules package-lock.json
+    npm install
+    echo "Web dependencies installed!"
+  else
+    echo "First run - installing web dependencies..."
+    cd "${CLAUDE_PLUGIN_ROOT}/src/web"
+    npm install
+    echo "Web dependencies installed!"
+  fi
+else
+  echo "Dependencies already installed"
 fi
 ```
 
