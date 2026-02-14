@@ -1,6 +1,6 @@
 ---
 name: study
-description: This skill should be used when user asks to "study this paper", "analyze this PDF", "generate study materials from paper", or wants comprehensive analysis of a research paper.
+description: Use this skill when the user wants to study, analyze, or deeply understand a research paper (PDF).
 disable-model-invocation: false
 allowed-tools: Bash, Write, Edit, Read
 ---
@@ -9,20 +9,22 @@ allowed-tools: Bash, Write, Edit, Read
 
 Invoke this skill with a paper PDF path.
 
-## Important: Adaptive Material Generation
+---
 
-**Your primary goal is to create materials that facilitate deep learning, not just summarize.**
+# Core Philosophy
 
-Think like an excellent teacher explaining the paper to a smart colleague. Let Claude decide adaptively:
+Primary Objective:
+Facilitate deep conceptual understanding and research-level thinking.
 
-1. **Dig into the core** - Go beyond surface-level summary
-2. **Organize logically** - Build knowledge progressively
-3. **Focus on understanding** - Prioritize conceptual clarity
-4. **Adapt to paper complexity** - Claude will decide the appropriate number and type of files based on the paper's complexity and needs
+Secondary Objective:
+Create a structured, reusable paper knowledge system.
 
-## Step 0: Check Dependencies (First Run Only)
+This workflow is not just for summarizing — it builds a learning environment around the paper.
 
-Check if dependencies are installed:
+---
+
+# Step 0: Check Dependencies (First Run Only)
+
 ```bash
 if [ ! -f "${CLAUDE_PLUGIN_ROOT}/.installed" ]; then
   echo "First run - installing dependencies..."
@@ -33,156 +35,260 @@ if [ ! -f "${CLAUDE_PLUGIN_ROOT}/.installed" ]; then
 fi
 ```
 
-**Note**: On macOS, if you need to limit npm install time, use `gtimeout` (from coreutils) or run without timeout as install is typically fast.
+Recommended:
 
-## Step 1: Parse PDF
+* Node >= 18
 
-Run the PDF parser script to extract structured information:
+---
+
+# Step 1: Parse PDF
+
+Extract structured information:
+
 ```bash
 node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/parse-pdf.js <pdf-path>
 ```
 
-The script outputs JSON with:
-- title, authors, abstract, content, githubLinks, codeLinks
-- Save this to `meta.json` in the paper directory
+Output includes:
 
-**Copy the original PDF** to the paper directory for reference:
+* title
+* authors
+* abstract
+* full content
+* githubLinks
+* codeLinks
+
+Save to:
+
+```
+~/claude-papers/papers/{paper-slug}/meta.json
+```
+
+Copy original PDF:
+
 ```bash
 cp <pdf-path> ~/claude-papers/papers/{paper-slug}/paper.pdf
 ```
 
-## Step 2: Generate Learning Materials
+Fallback:
+If structured parsing fails, extract raw text and continue with degraded structure.
 
-Create a paper directory: `~/claude-papers/papers/{paper-slug}/`
+---
 
-**Important: Use the user's input language** for all generated materials, especially when the user specifies a language (e.g., if they ask in Chinese, generate materials in Chinese).
+# Step 2: Assess Paper Before Generating Materials
 
-Based on parsed data and your analysis, adaptively create the appropriate files. Claude will decide the number and complexity based on the paper.
+Before generating any files, evaluate:
 
-### Core Study Materials
+1. Difficulty Level
 
-**README.md** - Quick navigation guide
-- What this paper is about (one paragraph)
-- How to navigate the materials
-- Key takeaways at a glance
+   * Beginner
+   * Intermediate
+   * Advanced
+   * Highly Theoretical
 
-**summary.md** - Comprehensive but focused summary
-- Background and context: What problem are they solving?
-- Problem statement: What's the specific challenge?
-- Main contributions: What's novel?
-- Key results: Quantitative metrics
+2. Paper Nature
 
-**insights.md** - Deep dive into core ideas (most important)
-- The key insight in plain English
-- Core methodology distilled
-- Technical innovations
-- Analysis: Why effective? Trade-offs?
-- Limitations and assumptions
-- Practical implications
+   * Theoretical
+   * Architecture-based
+   * Empirical-heavy
+   * System design
+   * Survey
 
-**Note:** You can use LaTeX-style math equations in markdown files when needed for clarity (e.g., $L = \sum_{i} \omega_i L_i$ or use inline `$$` or display math).
+3. Methodological Complexity
 
-**method.md** (create only if methodology is complex)
-- Natural language descriptions of each component
-- Algorithm step-by-step
-- Architecture diagrams
-- Implementation details
-- Pseudocode (balance code with explanatory text)
-- Parameter explanations
+   * Simple pipeline
+   * Multi-stage training
+   * Novel architecture
+   * Heavy mathematical derivation
 
-Use a mix of explanatory paragraphs and code blocks rather than large continuous pseudocode sections. Explain the "why" before showing the "how".
+This assessment determines:
 
-**qa.md** - Self-assessment questions
+* Whether to create method.md
+* Whether to create .ipynb
+* Explanation depth
+* Code demo complexity
 
-Generate 15 questions (5 basic, 5 intermediate, 5 advanced) using the **details/summary style** for Q&A:
+---
+
+# Step 3: Generate Core Study Materials
+
+Create folder:
+
+```
+~/claude-papers/papers/{paper-slug}/
+```
+
+All materials must use the user’s input language only.
+
+---
+
+## Required Files
+
+### README.md
+
+* What the paper is about (one paragraph)
+* Difficulty level
+* How to navigate materials
+* Key takeaways
+* Estimated study time
+* Folder structure overview
+
+---
+
+### summary.md
+
+* Background context
+* Problem statement
+* Main contributions
+* Key results
+* Quantitative metrics
+
+---
+
+### insights.md (Most Important)
+
+* Core idea explained plainly
+* Why this works
+* What conceptual shift it introduces
+* Trade-offs
+* Limitations
+* Comparison to prior work
+* Practical implications
+
+---
+
+### qa.md
+
+15 questions:
+
+* 5 basic
+* 5 intermediate
+* 5 advanced
+
+Use this format:
 
 ```markdown
-### Question title
+### Question
 
 <details>
 <summary>Answer</summary>
 
-Detailed answer content here with proper indentation.
+Detailed explanation.
 
 </details>
+
+---
 ```
 
-Each answer should be properly indented within the `<details>` block. Use horizontal rules (`---`) between questions for better readability.
+---
 
-## Step 3: Generate Code Demonstrations (Required)
+## Conditional Files
 
-**At least one code demonstration must be provided for every paper.**
+### method.md (Recommended for most papers)
 
-Claude will adaptively create the appropriate code files based on the paper's needs. Possibilities include:
+Include:
 
-- `code/{descriptive_name}.py` - Clean, well-commented reference implementation (e.g., `vad_architecture.py`, `vectorized_planning.py`)
-- `code/{descriptive_name}.ipynb` - Interactive notebook for exploration
-- Additional specialized files in `code/` folder for complex papers
+* Component breakdown
+* Algorithm flow
+* Architecture diagram (ASCII if needed)
+* Step-by-step explanation
+* Pseudocode (balanced with explanation)
+* Implementation pitfalls
+* Hyperparameter sensitivity
+* Reproduction risks
 
-**Guidelines for code file naming:**
-- Choose names that reflect the paper's contribution (e.g., `{model_name}_demo.py`, `{key_concept}_implementation.py`)
-- Keep it concise but descriptive
-- Avoid generic names like `code-demo.py`
+---
 
-Key principles for code files:
-- **Self-contained** - Each file should be runnable independently
-- **Clear structure** - No complex directory hierarchies
-- **Educational comments** - Explain why, not just what
-- **Different purposes**:
-  - `.py` files: Clean reference implementations for studying
-  - `.ipynb` files: Interactive exploration and visualization
+### mental-model.md (Recommended for most papers)
 
-Even for theoretical papers without explicit code artifacts, create at least one of:
-- A conceptual implementation demonstrating key ideas
-- A simplified prototype showing the algorithm
-- A visualization script to illustrate the paper's contributions
+* What type of problem is this?
+* What prior knowledge is assumed?
+* How it fits into the broader research map
+* How to mentally categorize this work
 
-Git clone original code to `code/original-code/` if GitHub link is available.
+---
 
-## Step 4: Extract and Include Original Code
+### reflection.md (Optional auto-generated)
 
-If the paper includes original code (GitHub link, arXiv code, etc.):
+* If I were to extend this paper
+* What open problems remain
+* What assumptions are fragile
+* Where it might fail in practice
 
-1. **Detect code availability** - Check meta.json for githubLinks and codeLinks
-2. **Clone/download original code** - Download to `code/original-code/`
+---
 
-**Try git clone with proper checks**:
+# Step 4: Code Demonstrations (Mandatory)
+
+At least one runnable demo must be created.
+
+Guidelines:
+
+* Self-contained
+* Runnable independently
+* Educational comments (explain why)
+* Focus on core contribution
+* Prefer clarity over completeness
+
+Possible types:
+
+* Simplified conceptual implementation
+* Visualization script
+* Minimal architecture demo
+* Interactive notebook (.ipynb)
+
+Name descriptively:
+
+* model_demo.py
+* vectorized_planning_demo.py
+* contrastive_loss_visualization.ipynb
+
+Avoid generic names.
+
+---
+
+# Step 5: Extract Original Code (If Available)
+
+If GitHub link exists:
+
 ```bash
-# Check if git is available and url is valid
 if command -v git &> /dev/null && [ -n "$GITHUB_URL" ]; then
   cd ~/claude-papers/papers/{paper-slug}/code
-  git clone "$GITHUB_URL" original-code || echo "Git clone failed, continuing without original code"
+  git clone --depth 1 "$GITHUB_URL" original-code || echo "Clone failed"
 fi
 ```
 
-3. **Preserve structure** - Keep original code organization
-4. **Add notes** - Document any setup requirements if needed
+Preserve original structure.
 
-## Step 5: Extract Key Images
+---
 
-Extract images from the PDF using Python:
+# Step 6: Extract Images
+
 ```bash
-# Create images directory first
 mkdir -p ~/claude-papers/papers/{paper-slug}/images
 
-# Extract embedded images and page previews
 python3 ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/extract-images.py \
   paper.pdf \
   ~/claude-papers/papers/{paper-slug}/images
 ```
 
-This script will:
-- Extract embedded images from the PDF
-- If few images are found, generate page previews for the first 3 pages
-- Save images with descriptive names like `page_1_img_1.png`, `page_1_preview.png`
+Rename key images descriptively:
 
-Rename descriptively if needed (e.g., `architecture.png`, `results.png`).
+* architecture.png
+* training_pipeline.png
+* results_table.png
 
-## Step 6: Update Index
+---
 
-Update `~/claude-papers/index.json` with paper metadata.
+# Step 7: Update Index
 
-Add an entry with the following structure:
+If index.json does not exist, create:
+
+```json
+{"papers": []}
+```
+
+Add entry:
+
 ```json
 {
   "id": "paper-slug",
@@ -197,8 +303,76 @@ Add an entry with the following structure:
 }
 ```
 
-The index.json should have structure: `{"papers": [...]}`
+---
 
-## Step 7: Launch Web UI
 
-Invoke `/claude-paper:webui` skill.
+# Step 8: Relaunch Web UI
+
+Invoke:
+
+```
+/claude-paper:webui
+```
+
+
+# Step 9: Interactive Deep Learning Loop
+
+After all files are generated:
+
+## Present to User:
+
+1. Ask:
+
+   * What part is still unclear?
+   * Do you want deeper mathematical breakdown?
+   * Do you want implementation-level analysis?
+   * Do you want comparison with another paper?
+
+2. Allow user to:
+
+   * Ask deeper questions
+   * Summarize their understanding
+   * Propose new ideas
+
+---
+
+## If user asks deeper questions:
+
+Generate a new file inside the same folder:
+
+Examples:
+
+* deep-dive-contrastive-loss.md
+* math-derivation-breakdown.md
+* comparison-with-transformers.md
+* extension-ideas.md
+
+---
+
+## If user provides their own summary:
+
+1. Refine it.
+2. Improve structure.
+3. Save as:
+
+* user-summary-v1.md
+
+If iterated:
+
+* user-summary-v2.md
+
+---
+
+## If user wants structured consolidation:
+
+Create:
+
+* consolidated-notes.md
+* study-session-1.md
+* exam-review.md
+
+---
+
+This makes the paper folder a growing knowledge node.
+
+---
