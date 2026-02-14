@@ -60,16 +60,6 @@ Install from the Claude Code marketplace:
 - Initialize the search index
 - Install web viewer dependencies
 
-### Usage Example
-
-You can simply talk to Claude Code to study a paper:
-
-```
-Help me study the paper at ~/Downloads/attention-is-all-you-need.pdf
-```
-
-Claude will automatically trigger the study workflow and generate comprehensive learning materials for you.
-
 ### System Requirements
 
 - **Node.js**: 18.0.0 or higher
@@ -86,11 +76,13 @@ Claude will automatically trigger the study workflow and generate comprehensive 
 
 ### Study a Research Paper
 
-```bash
-/claude-paper:study /path/to/paper.pdf
+Simply talk to Claude Code to study a paper:
+
+```
+Help me study the paper at ~/Downloads/attention-is-all-you-need.pdf
 ```
 
-**This command will:**
+Claude will automatically trigger the study workflow and:
 1. Parse the PDF and extract metadata
 2. Analyze paper complexity and type
 3. Generate adaptive learning materials
