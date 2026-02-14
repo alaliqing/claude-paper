@@ -109,7 +109,9 @@ Detailed answer content here with proper indentation.
 
 Each answer should be properly indented within the `<details>` block. Use horizontal rules (`---`) between questions for better readability.
 
-## Step 3: Generate Code Demonstrations
+## Step 3: Generate Code Demonstrations (Required)
+
+**At least one code demonstration must be provided for every paper.**
 
 Claude will adaptively create the appropriate code files based on the paper's needs. Possibilities include:
 
@@ -129,6 +131,11 @@ Key principles for code files:
 - **Different purposes**:
   - `.py` files: Clean reference implementations for studying
   - `.ipynb` files: Interactive exploration and visualization
+
+Even for theoretical papers without explicit code artifacts, create at least one of:
+- A conceptual implementation demonstrating key ideas
+- A simplified prototype showing the algorithm
+- A visualization script to illustrate the paper's contributions
 
 Git clone original code to `code/original-code/` if GitHub link is available.
 
