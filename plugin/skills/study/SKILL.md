@@ -48,23 +48,34 @@ Recommended:
 
 # Step 1: Download and Parse PDF
 
-## Step 1a: Download PDF if URL provided
-
 Supports multiple input formats:
 
 * **Local path**: `~/Downloads/paper.pdf`
 * **Direct PDF URL**: `https://arxiv.org/pdf/1706.03762.pdf`
 * **arXiv URL**: `https://arxiv.org/abs/1706.03762`
 
+## Step 1a: Check input type and download if URL
+
 ```bash
-INPUT_PATH=$(node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/download-pdf.js "<user-input>")
+USER_INPUT="<user-input>"
+
+# Check if input is a URL (starts with http:// or https://)
+if [[ "$USER_INPUT" =~ ^https?:// ]]; then
+  # Download PDF from URL
+  INPUT_PATH=$(node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/download-pdf.js "$USER_INPUT")
+else
+  # Use local path directly
+  INPUT_PATH="$USER_INPUT"
+fi
 ```
 
-The script will:
-* Download PDFs from URLs to `/tmp/claude-paper-downloads/`
+For URLs, the download script will:
+* Download PDFs to `/tmp/claude-paper-downloads/`
 * Convert arXiv `/abs/` URLs to PDF URLs automatically
 * Validate that URLs point to PDF files
 * Return the local file path for processing
+
+For local paths, use the path directly without downloading.
 
 ## Step 1b: Parse PDF
 
