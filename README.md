@@ -71,6 +71,18 @@ Simply talk to Claude Code to study a paper:
 Help me study the paper at ~/Downloads/attention-is-all-you-need.pdf
 ```
 
+You can also use URLs:
+
+```
+# Direct PDF URL
+Help me study the paper at https://arxiv.org/pdf/1706.03762.pdf
+
+# arXiv abstract URL (automatically converted to PDF)
+Help me study the paper at https://arxiv.org/abs/1706.03762
+```
+
+Claude will automatically trigger the study workflow and:
+
 Claude will automatically trigger the study workflow and:
 1. Parse the PDF and extract metadata
 2. Analyze paper complexity and type

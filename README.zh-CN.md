@@ -70,6 +70,16 @@
 帮我学习 ~/Downloads/attention-is-all-you-need.pdf 这篇论文
 ```
 
+您也可以使用 URL：
+
+```
+# 直接 PDF 链接
+帮我学习 https://arxiv.org/pdf/1706.03762.pdf 这篇论文
+
+# arXiv 摘要链接（自动转换为 PDF）
+帮我学习 https://arxiv.org/abs/1706.03762 这篇论文
+```
+
 Claude 将自动触发学习工作流程并：
 1. 解析 PDF 并提取元数据
 2. 分析论文复杂性和类型
