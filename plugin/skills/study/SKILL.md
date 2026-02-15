@@ -9,6 +9,10 @@ allowed-tools: Bash, Write, Edit, Read
 
 Invoke this skill with a paper PDF path.
 
+**Language Detection**: Detect the user's language from their input and generate ALL materials in that language.
+- Example: User says "我们学习一下这篇论文吧" → Generate materials in Chinese
+- Example: User says "Let's study this paper" → Generate materials in English
+
 ---
 
 # Core Philosophy
@@ -62,7 +66,7 @@ USER_INPUT="<user-input>"
 # Check if input is a URL (starts with http:// or https://)
 if [[ "$USER_INPUT" =~ ^https?:// ]]; then
   # Download PDF from URL
-  INPUT_PATH=$(node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/download-pdf.js "$USER_INPUT")
+  INPUT_PATH=$(node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/download-pdf.cjs "$USER_INPUT")
 else
   # Use local path directly
   INPUT_PATH="$USER_INPUT"
@@ -153,8 +157,6 @@ Create folder:
 ```
 ~/claude-papers/papers/{paper-slug}/
 ```
-
-All materials must use the user’s input language only.
 
 ---
 
