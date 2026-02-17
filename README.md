@@ -4,10 +4,11 @@
 
 **Transform research papers into comprehensive learning environments**
 
+[English](README.md) | [中文](README.zh-CN.md)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Node Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-purple)](https://code.claude.com)
-[![Chinese](https://img.shields.io/badge/文档-中文版-red.svg)](README.zh-CN.md)
 
 A powerful **Claude Code plugin** that automates research paper study through intelligent material generation, code demonstrations, and an interactive web viewer.
 
