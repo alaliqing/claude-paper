@@ -36,7 +36,7 @@
 
 ```bash
 # 添加市场
-/plugin marketplace add qinjing/claude-paper
+/plugin marketplace add alaliqing/claude-paper
 
 # 安装插件
 /plugin install claude-paper

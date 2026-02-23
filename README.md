@@ -83,8 +83,6 @@ Help me study the paper at https://arxiv.org/abs/1706.03762
 ```
 
 Claude will automatically trigger the study workflow and:
-
-Claude will automatically trigger the study workflow and:
 1. Parse the PDF and extract metadata
 2. Analyze paper complexity and type
 3. Generate adaptive learning materials
