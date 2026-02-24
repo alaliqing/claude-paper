@@ -315,13 +315,15 @@ Rename key images descriptively:
 
 # Step 6: Update Index
 
+**CRITICAL**: Read existing index.json first, then append the new paper. Never overwrite the entire file.
+
 If index.json does not exist, create:
 
 ```json
 {"papers": []}
 ```
 
-Add entry:
+Append new entry to the papers array:
 
 ```json
 {
