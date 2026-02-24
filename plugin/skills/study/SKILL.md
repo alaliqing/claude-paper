@@ -336,6 +336,10 @@ Add entry:
   "codeLinks": ["https://..."]
 }
 ```
+**IMPORTANT**: The index.json file must be located at:
+```
+~/claude-papers/index.json
+```
 
 ---
 
