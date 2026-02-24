@@ -1,6 +1,6 @@
 ---
 name: study
-description: Use this skill when the user wants to study, analyze, or deeply understand a research paper (PDF).
+description: Use this skill when the user wants to read, study, analyze, or deeply understand a research paper (PDF).
 disable-model-invocation: false
 allowed-tools: Bash, Write, Edit, Read
 ---
