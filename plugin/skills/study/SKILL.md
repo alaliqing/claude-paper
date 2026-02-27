@@ -38,6 +38,9 @@ if [ ! -f "${CLAUDE_PLUGIN_ROOT}/.installed" ]; then
   # Install Python dependencies for image extraction
   python3 -m pip install pymupdf --user 2>/dev/null || pip3 install pymupdf --user 2>/dev/null || echo "Warning: Failed to install pymupdf"
 
+  # Install Python dependencies for TeX parsing
+  python3 -m pip install pylatexenc --user 2>/dev/null || pip3 install pylatexenc --user 2>/dev/null || echo "Warning: Failed to install pylatexenc (TeX parsing will fallback to PDF)"
+
   touch "${CLAUDE_PLUGIN_ROOT}/.installed"
   echo "Dependencies installed!"
 fi
@@ -50,43 +53,93 @@ Recommended:
 
 ---
 
-# Step 1: Download and Parse PDF
+# Step 1: Download and Parse Paper (TeX or PDF)
 
 Supports multiple input formats:
 
 * **Local path**: `~/Downloads/paper.pdf`
 * **Direct PDF URL**: `https://arxiv.org/pdf/1706.03762.pdf`
-* **arXiv URL**: `https://arxiv.org/abs/1706.03762`
+* **arXiv URL**: `https://arxiv.org/abs/1706.03762` (will try TeX source first for better quality)
 
-## Step 1a: Check input type and download if URL
+## Step 1a: Detect source type and download
+
+For arXiv papers, try TeX source first (better quality), fallback to PDF if unavailable.
 
 ```bash
 USER_INPUT="<user-input>"
+SOURCE_TYPE="pdf"
+INPUT_PATH=""
+MAIN_TEX=""
+EXTRACT_PATH=""
+ARXIV_ID=""
 
 # Check if input is a URL (starts with http:// or https://)
 if [[ "$USER_INPUT" =~ ^https?:// ]]; then
-  # Download PDF from URL
-  INPUT_PATH=$(node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/download-pdf.cjs "$USER_INPUT")
+  # Check if arXiv link
+  if [[ "$USER_INPUT" =~ arxiv\.org ]]; then
+    # Extract arXiv ID
+    ARXIV_ID=$(echo "$USER_INPUT" | grep -oP '(\d{4}\.\d{4,5}(v\d+)?)')
+
+    if [ -n "$ARXIV_ID" ]; then
+      echo "Detected arXiv paper: $ARXIV_ID"
+      echo "Attempting to download TeX source for better quality..."
+
+      # Try TeX source download
+      TEX_RESULT=$(node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/download-tex.cjs "$ARXIV_ID" 2>&1)
+
+      if echo "$TEX_RESULT" | jq -e '.success' > /dev/null 2>&1; then
+        SOURCE_TYPE="tex"
+        MAIN_TEX=$(echo "$TEX_RESULT" | jq -r '.mainTex')
+        EXTRACT_PATH=$(echo "$TEX_RESULT" | jq -r '.extractPath')
+        echo "✓ TeX source downloaded successfully"
+      else
+        # Fallback: download PDF
+        echo "! TeX source unavailable, using PDF instead"
+        SOURCE_TYPE="pdf"
+        PDF_URL="https://arxiv.org/pdf/${ARXIV_ID}.pdf"
+        INPUT_PATH=$(node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/download-pdf.cjs "$PDF_URL")
+      fi
+    else
+      # Not a valid arXiv ID, download PDF
+      INPUT_PATH=$(node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/download-pdf.cjs "$USER_INPUT")
+      SOURCE_TYPE="pdf"
+    fi
+  else
+    # Non-arXiv URL, download PDF
+    INPUT_PATH=$(node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/download-pdf.cjs "$USER_INPUT")
+    SOURCE_TYPE="pdf"
+  fi
 else
   # Use local path directly
   INPUT_PATH="$USER_INPUT"
+  SOURCE_TYPE="pdf"
 fi
 ```
 
-For URLs, the download script will:
-* Download PDFs to `/tmp/claude-paper-downloads/`
-* Convert arXiv `/abs/` URLs to PDF URLs automatically
-* Validate that URLs point to PDF files
-* Return the local file path for processing
+## Step 1b: Parse with fallback
 
-For local paths, use the path directly without downloading.
-
-## Step 1b: Parse PDF
-
-Extract structured information:
+For TeX sources, try LaTeX parsing first, fallback to PDF if parsing fails.
 
 ```bash
-node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/parse-pdf.js "$INPUT_PATH"
+if [ "$SOURCE_TYPE" = "tex" ]; then
+  # Try TeX parsing
+  echo "Parsing LaTeX source..."
+  METADATA=$(python3 ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/parse-tex.py "$MAIN_TEX" "$EXTRACT_PATH" 2>&1)
+
+  if [ $? -eq 0 ]; then
+    echo "✓ Successfully parsed LaTeX source (better quality than PDF)"
+  else
+    echo "! LaTeX parsing failed, falling back to PDF..."
+    # Download PDF as fallback
+    PDF_URL="https://arxiv.org/pdf/${ARXIV_ID}.pdf"
+    INPUT_PATH=$(node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/download-pdf.cjs "$PDF_URL")
+    METADATA=$(node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/parse-pdf.js "$INPUT_PATH")
+    SOURCE_TYPE="pdf"
+  fi
+else
+  # Direct PDF parsing
+  METADATA=$(node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/parse-pdf.js "$INPUT_PATH")
+fi
 ```
 
 Output includes:
@@ -97,6 +150,7 @@ Output includes:
 * full content
 * githubLinks
 * codeLinks
+* sourceType (tex or pdf)
 
 Save to:
 
@@ -104,10 +158,17 @@ Save to:
 ~/claude-papers/papers/{paper-slug}/meta.json
 ```
 
-Copy original PDF:
+Copy original PDF (for TeX sources, download the PDF for reference):
 
 ```bash
-cp <pdf-path> ~/claude-papers/papers/{paper-slug}/paper.pdf
+if [ "$SOURCE_TYPE" = "tex" ]; then
+  # Download PDF for reference
+  PDF_URL="https://arxiv.org/pdf/${ARXIV_ID}.pdf"
+  PDF_PATH=$(node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/download-pdf.cjs "$PDF_URL")
+  cp "$PDF_PATH" ~/claude-papers/papers/{paper-slug}/paper.pdf
+else
+  cp "$INPUT_PATH" ~/claude-papers/papers/{paper-slug}/paper.pdf
+fi
 ```
 
 Fallback:

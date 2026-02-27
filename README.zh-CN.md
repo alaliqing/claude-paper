@@ -18,7 +18,10 @@
 
 ## 功能特性
 
-- **自动 PDF 解析** - 提取标题、作者、摘要和完整内容
+- **自动 LaTeX/PDF 解析** - 优先尝试 LaTeX 源文件（更好的质量），回退到 PDF
+  - **LaTeX 源文件解析**用于 arXiv 论文（速度快 5-10 倍，文本质量更好）
+  - **自动回退**到 PDF 当 LaTeX 不可用时
+  - 将数学公式保留为可读文本
 - **智能内容截断** - 智能处理大型论文（50k 字符限制）
 - **代码仓库检测** - 自动发现 GitHub、arXiv、CodeOcean 链接
 - **自适应学习材料** - 根据论文复杂性生成 README、摘要、洞察力、问答
@@ -45,7 +48,8 @@
 ```
 
 **就这样！** 插件将自动：
-- 安装所有依赖项（用于 PDF 处理的 pdf-parse）
+- 安装所有依赖项（用于处理的 pdf-parse、tar-stream）
+- 安装 Python 依赖项（用于 LaTeX 解析的 pylatexenc）
 - 在 `~/claude-papers/` 创建论文目录
 - 初始化搜索索引
 - 安装网页查看器依赖项
@@ -54,6 +58,7 @@
 
 - **Node.js**: 18.0.0 或更高版本
 - **npm**: 随 Node.js 一起安装
+- **Python 3**: 用于 LaTeX 解析（需要 pip 来安装 pylatexenc）
 - **Claude Code**: 支持插件的最新版本
 - **poppler-utils**: 用于 PDF 图像提取（通过系统包管理器安装）
   - **macOS**: `brew install poppler`
@@ -78,9 +83,11 @@
 # 直接 PDF 链接
 帮我学习 https://arxiv.org/pdf/1706.03762.pdf 这篇论文
 
-# arXiv 摘要链接（自动转换为 PDF）
+# arXiv 摘要链接（如果可用，自动使用 LaTeX 源文件）
 帮我学习 https://arxiv.org/abs/1706.03762 这篇论文
 ```
+
+**注意**：对于 arXiv 论文，插件会自动尝试先下载和解析 LaTeX 源文件（更快、质量更好），如果不可用则回退到 PDF。
 
 Claude 将自动触发学习工作流程并：
 1. 解析 PDF 并提取元数据

@@ -18,7 +18,10 @@ A powerful **Claude Code plugin** that automates research paper study through in
 
 ## Features
 
-- **Automatic PDF parsing** - Extract title, authors, abstract, and full content
+- **Automatic LaTeX/PDF parsing** - Try LaTeX source first (better quality), fallback to PDF
+  - **LaTeX source parsing** for arXiv papers (5-10x faster, better text quality)
+  - **Automatic fallback** to PDF when LaTeX is unavailable
+  - Preserves math equations as readable text
 - **Smart content truncation** - Handles large papers (50k char limit) intelligently
 - **Code repository detection** - Automatically finds GitHub, arXiv, CodeOcean links
 - **Adaptive learning materials** - Generates README, summary, insights, Q&A based on paper complexity
@@ -45,7 +48,8 @@ Install from the Claude Code marketplace:
 ```
 
 **That's it!** The plugin will automatically:
-- Install all dependencies (pdf-parse for PDF processing)
+- Install all dependencies (pdf-parse, tar-stream for processing)
+- Install Python dependencies (pylatexenc for LaTeX parsing)
 - Create the papers directory at `~/claude-papers/`
 - Initialize the search index
 - Install web viewer dependencies
@@ -54,6 +58,7 @@ Install from the Claude Code marketplace:
 
 - **Node.js**: 18.0.0 or higher
 - **npm**: Comes with Node.js
+- **Python 3**: For LaTeX parsing (with pip for pylatexenc)
 - **Claude Code**: Latest version with plugin support
 - **poppler-utils**: For PDF image extraction (install via system package manager)
   - **macOS**: `brew install poppler`
@@ -78,9 +83,11 @@ You can also use URLs:
 # Direct PDF URL
 Help me study the paper at https://arxiv.org/pdf/1706.03762.pdf
 
-# arXiv abstract URL (automatically converted to PDF)
+# arXiv abstract URL (automatically uses LaTeX source if available)
 Help me study the paper at https://arxiv.org/abs/1706.03762
 ```
+
+**Note**: For arXiv papers, the plugin automatically tries to download and parse the LaTeX source first (faster, better quality), then falls back to PDF if unavailable.
 
 Claude will automatically trigger the study workflow and:
 1. Parse the PDF and extract metadata
