@@ -27,11 +27,14 @@ This workflow is not just for summarizing — it builds a learning environment a
 
 ---
 
-# Step 0: Check Dependencies (First Run Only)
+# Step 0: Check Dependencies (First Run or After Update)
 
 ```bash
-if [ ! -f "${CLAUDE_PLUGIN_ROOT}/.installed" ]; then
-  echo "First run - installing dependencies..."
+# Version-based dependency check (increment when adding new dependencies)
+DEPS_VERSION="2"  # v2: added tar-stream and pylatexenc
+
+if [ ! -f "${CLAUDE_PLUGIN_ROOT}/.installed" ] || [ "$(cat ${CLAUDE_PLUGIN_ROOT}/.installed 2>/dev/null)" != "$DEPS_VERSION" ]; then
+  echo "Installing/updating dependencies (v${DEPS_VERSION})..."
   cd "${CLAUDE_PLUGIN_ROOT}"
   npm install || exit 1
 
@@ -41,7 +44,7 @@ if [ ! -f "${CLAUDE_PLUGIN_ROOT}/.installed" ]; then
   # Install Python dependencies for TeX parsing
   python3 -m pip install pylatexenc --user 2>/dev/null || pip3 install pylatexenc --user 2>/dev/null || echo "Warning: Failed to install pylatexenc (TeX parsing will fallback to PDF)"
 
-  touch "${CLAUDE_PLUGIN_ROOT}/.installed"
+  echo "$DEPS_VERSION" > "${CLAUDE_PLUGIN_ROOT}/.installed"
   echo "Dependencies installed!"
 fi
 ```
