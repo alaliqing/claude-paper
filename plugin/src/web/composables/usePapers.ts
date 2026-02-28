@@ -7,6 +7,7 @@ export interface Paper {
   codeLinks?: string[]
   url?: string
   date?: string
+  tags?: string[]
 }
 
 export const usePapers = () => {
@@ -42,12 +43,32 @@ export const usePapers = () => {
     }
   }
 
+  const updatePaperTags = async (slug: string, tags: string[]): Promise<boolean> => {
+    try {
+      await $fetch(`/api/papers/${slug}/tags`, {
+        method: 'PATCH',
+        body: { tags }
+      })
+
+      const paper = papers.value.find(p => p.slug === slug)
+      if (paper) {
+        paper.tags = tags
+      }
+
+      return true
+    } catch (e) {
+      console.error('Failed to update tags:', e)
+      return false
+    }
+  }
+
   return {
     papers,
     loading,
     error,
     loadPapers,
     getPaper,
-    getPaperMarkdown
+    getPaperMarkdown,
+    updatePaperTags
   }
 }

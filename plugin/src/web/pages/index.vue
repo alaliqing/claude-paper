@@ -13,6 +13,14 @@
         <p class="subtitle">All papers stored in: <code>~/claude-papers/papers/</code></p>
       </div>
 
+      <SearchFilterBar
+        v-if="!loading && !error && papers.length > 0"
+        :available-tags="availableTags"
+        @search="handleSearch"
+        @filter="handleFilter"
+        @sort="handleSort"
+      />
+
       <div v-if="loading" class="loading-state">
         <div class="spinner"></div>
         <p>Loading papers...</p>
@@ -21,23 +29,117 @@
       <div v-else-if="papers.length === 0" class="empty-state">
         <p>No papers yet. Use <code>/claude-paper:study</code> to add papers.</p>
       </div>
+      <div v-else-if="displayedPapers.length === 0" class="empty-state">
+        <p>No papers match your filters.</p>
+      </div>
       <div v-else class="papers-grid">
         <PaperCard
-          v-for="paper in papers"
+          v-for="paper in displayedPapers"
           :key="paper.slug"
           :paper="paper"
+          @edit-tags="openTagEditor(paper)"
         />
       </div>
+    </div>
+
+    <div v-if="editingPaper" class="modal-overlay" @click.self="closeTagEditor">
+      <TagEditor
+        :initial-tags="editingPaper.tags || []"
+        @update="handleTagsUpdate"
+        @cancel="closeTagEditor"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
-const { papers, loading, error, loadPapers } = usePapers()
+import type { Paper } from '~/composables/usePapers'
+
+const { papers, loading, error, loadPapers, updatePaperTags } = usePapers()
+
+const searchQuery = ref('')
+const selectedTags = ref<string[]>([])
+const sortBy = ref('default')
+const editingPaper = ref<Paper | null>(null)
 
 onMounted(async () => {
   await loadPapers()
 })
+
+const availableTags = computed(() => {
+  const tags = new Set<string>()
+  papers.value.forEach(paper => {
+    if (paper.tags) {
+      paper.tags.forEach(tag => tags.add(tag))
+    }
+  })
+  return Array.from(tags).sort()
+})
+
+const filteredPapers = computed(() => {
+  let result = papers.value
+
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    result = result.filter(paper => {
+      return (
+        paper.title.toLowerCase().includes(query) ||
+        paper.authors.some(author => author.toLowerCase().includes(query)) ||
+        paper.abstract.toLowerCase().includes(query)
+      )
+    })
+  }
+
+  if (selectedTags.value.length > 0) {
+    result = result.filter(paper => {
+      if (!paper.tags || paper.tags.length === 0) return false
+      return selectedTags.value.every(tag => paper.tags?.includes(tag))
+    })
+  }
+
+  return result
+})
+
+const displayedPapers = computed(() => {
+  let result = [...filteredPapers.value]
+
+  if (sortBy.value === 'a-z') {
+    result.sort((a, b) => a.title.localeCompare(b.title))
+  } else if (sortBy.value === 'z-a') {
+    result.sort((a, b) => b.title.localeCompare(a.title))
+  }
+
+  return result
+})
+
+const handleSearch = (query: string) => {
+  searchQuery.value = query
+}
+
+const handleFilter = (tags: string[]) => {
+  selectedTags.value = tags
+}
+
+const handleSort = (sort: string) => {
+  sortBy.value = sort
+}
+
+const openTagEditor = (paper: Paper) => {
+  editingPaper.value = paper
+}
+
+const closeTagEditor = () => {
+  editingPaper.value = null
+}
+
+const handleTagsUpdate = async (newTags: string[]) => {
+  if (!editingPaper.value) return
+
+  const success = await updatePaperTags(editingPaper.value.slug, newTags)
+  if (success) {
+    closeTagEditor()
+  }
+}
 
 useHead({
   title: 'Research Library'
@@ -172,5 +274,19 @@ h1 {
 
 .error-state {
   color: #c14a4a;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
 }
 </style>
