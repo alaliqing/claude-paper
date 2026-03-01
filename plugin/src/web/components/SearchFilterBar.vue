@@ -172,11 +172,10 @@ const clearAll = () => {
 }
 
 .search-filter-bar__row {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: flex-start;
   gap: 0.75rem 1.25rem;
-  flex-wrap: wrap;
 }
 
 .search-filter-bar__tags {
@@ -184,7 +183,7 @@ const clearAll = () => {
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
-  flex: 1 1 320px;
+  min-width: 0;
 }
 
 .search-filter-bar__label {
@@ -219,7 +218,7 @@ const clearAll = () => {
   align-items: center;
   justify-content: flex-end;
   gap: 1rem;
-  flex: 1 1 220px;
+  white-space: nowrap;
 }
 
 .search-filter-bar__sort {
