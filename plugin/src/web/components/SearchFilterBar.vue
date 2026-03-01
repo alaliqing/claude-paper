@@ -34,6 +34,25 @@
       </div>
 
       <div class="search-filter-bar__controls">
+        <div class="search-filter-bar__view-toggle" role="group" aria-label="View mode">
+          <button
+            class="search-filter-bar__view-btn"
+            :class="{ 'search-filter-bar__view-btn--active': viewMode === 'grid' }"
+            @click="setViewMode('grid')"
+            type="button"
+          >
+            Grid
+          </button>
+          <button
+            class="search-filter-bar__view-btn"
+            :class="{ 'search-filter-bar__view-btn--active': viewMode === 'list' }"
+            @click="setViewMode('list')"
+            type="button"
+          >
+            List
+          </button>
+        </div>
+
         <div class="search-filter-bar__sort">
           <label for="sort-select" class="search-filter-bar__label">Sort:</label>
           <select
@@ -64,12 +83,14 @@
 <script setup lang="ts">
 interface Props {
   availableTags: string[]
+  viewMode: 'grid' | 'list'
 }
 
 interface Emits {
   (e: 'search', query: string): void
   (e: 'filter', tags: string[]): void
   (e: 'sort', sortBy: string): void
+  (e: 'view', viewMode: 'grid' | 'list'): void
 }
 
 const props = defineProps<Props>()
@@ -121,6 +142,10 @@ const clearAll = () => {
   emit('search', '')
   emit('filter', [])
   emit('sort', 'default')
+}
+
+const setViewMode = (mode: 'grid' | 'list') => {
+  emit('view', mode)
 }
 </script>
 
@@ -221,6 +246,31 @@ const clearAll = () => {
   white-space: nowrap;
 }
 
+.search-filter-bar__view-toggle {
+  display: inline-flex;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+
+.search-filter-bar__view-btn {
+  padding: 0.375rem 0.625rem;
+  border: none;
+  background: #ffffff;
+  color: #4b5563;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.search-filter-bar__view-btn + .search-filter-bar__view-btn {
+  border-left: 1px solid #d1d5db;
+}
+
+.search-filter-bar__view-btn--active {
+  background: #4b5563;
+  color: #ffffff;
+}
+
 .search-filter-bar__sort {
   display: flex;
   align-items: center;
@@ -259,12 +309,13 @@ const clearAll = () => {
 
 @media (max-width: 768px) {
   .search-filter-bar__row {
-    flex-direction: column;
-    align-items: stretch;
+    grid-template-columns: 1fr;
   }
 
   .search-filter-bar__controls {
     justify-content: flex-start;
+    flex-wrap: wrap;
+    white-space: normal;
   }
 }
 </style>

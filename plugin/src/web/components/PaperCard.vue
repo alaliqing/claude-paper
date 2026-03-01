@@ -1,36 +1,75 @@
 <template>
-  <div class="paper-card-wrapper">
-    <NuxtLink :to="`/papers/${paper.slug}`" class="paper-card">
-      <h3>{{ paper.title }}</h3>
-      <p class="authors">{{ paper.authors.join(', ') }}</p>
-      <p class="abstract">{{ paper.abstract }}</p>
+  <div class="paper-card-wrapper" :class="{ 'paper-card-wrapper--list': viewMode === 'list' }">
+    <NuxtLink :to="`/papers/${paper.slug}`" class="paper-card" :class="{ 'paper-card--list': viewMode === 'list' }">
+      <template v-if="viewMode === 'list'">
+        <div class="paper-card__list-main">
+          <h3>{{ paper.title }}</h3>
+          <p class="abstract">{{ paper.abstract }}</p>
 
-      <div v-if="paper.tags && paper.tags.length > 0" class="tags-section">
-        <TagBadge
-          v-for="tag in paper.tags"
-          :key="tag"
-          :tag="tag"
-          size="small"
-        />
-      </div>
+          <div v-if="paper.githubLinks?.length || paper.codeLinks?.length" class="code-links">
+            <h4>Code Resources:</h4>
+            <ul>
+              <li v-for="link in paper.githubLinks" :key="link">
+                <a :href="link" target="_blank" rel="noopener noreferrer" @click.stop>
+                  {{ getRepoName(link) }}
+                  <span class="external-icon">↗</span>
+                </a>
+              </li>
+              <li v-for="link in paper.codeLinks" :key="link">
+                <a :href="link" target="_blank" rel="noopener noreferrer" @click.stop>
+                  {{ link }}
+                  <span class="external-icon">↗</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
 
-      <div v-if="paper.githubLinks?.length || paper.codeLinks?.length" class="code-links">
-        <h4>Code Resources:</h4>
-        <ul>
-          <li v-for="link in paper.githubLinks" :key="link">
-            <a :href="link" target="_blank" rel="noopener noreferrer" @click.stop>
-              {{ getRepoName(link) }}
-              <span class="external-icon">↗</span>
-            </a>
-          </li>
-          <li v-for="link in paper.codeLinks" :key="link">
-            <a :href="link" target="_blank" rel="noopener noreferrer" @click.stop>
-              {{ link }}
-              <span class="external-icon">↗</span>
-            </a>
-          </li>
-        </ul>
-      </div>
+        <div class="paper-card__list-meta">
+          <p class="authors">{{ paper.authors.join(', ') }}</p>
+          <div v-if="paper.tags && paper.tags.length > 0" class="tags-section">
+            <TagBadge
+              v-for="tag in paper.tags"
+              :key="tag"
+              :tag="tag"
+              size="small"
+            />
+          </div>
+        </div>
+      </template>
+
+      <template v-else>
+        <h3>{{ paper.title }}</h3>
+        <p class="authors">{{ paper.authors.join(', ') }}</p>
+        <p class="abstract">{{ paper.abstract }}</p>
+
+        <div v-if="paper.tags && paper.tags.length > 0" class="tags-section">
+          <TagBadge
+            v-for="tag in paper.tags"
+            :key="tag"
+            :tag="tag"
+            size="small"
+          />
+        </div>
+
+        <div v-if="paper.githubLinks?.length || paper.codeLinks?.length" class="code-links">
+          <h4>Code Resources:</h4>
+          <ul>
+            <li v-for="link in paper.githubLinks" :key="link">
+              <a :href="link" target="_blank" rel="noopener noreferrer" @click.stop>
+                {{ getRepoName(link) }}
+                <span class="external-icon">↗</span>
+              </a>
+            </li>
+            <li v-for="link in paper.codeLinks" :key="link">
+              <a :href="link" target="_blank" rel="noopener noreferrer" @click.stop>
+                {{ link }}
+                <span class="external-icon">↗</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </template>
     </NuxtLink>
     <button
       class="edit-tags-button"
@@ -50,6 +89,10 @@ const props = defineProps({
   paper: {
     type: Object as () => Paper,
     required: true
+  },
+  viewMode: {
+    type: String as () => 'grid' | 'list',
+    default: 'grid'
   }
 })
 
@@ -76,6 +119,10 @@ const getRepoName = (url) => {
   text-decoration: none;
   color: inherit;
   cursor: pointer;
+}
+
+.paper-card--list {
+  padding: 1.125rem 1.25rem;
 }
 
 .paper-card:hover {
@@ -180,5 +227,58 @@ const getRepoName = (url) => {
 .external-icon {
   font-size: 0.75em;
   opacity: 0.7;
+}
+
+@media (min-width: 960px) {
+  .paper-card--list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 340px);
+    column-gap: 1.25rem;
+    align-items: start;
+  }
+
+  .paper-card__list-main {
+    min-width: 0;
+  }
+
+  .paper-card__list-meta {
+    min-width: 0;
+  }
+
+  .paper-card--list .authors {
+    margin: 0 0 0.5rem 0;
+  }
+
+  .paper-card--list .tags-section {
+    margin: 0;
+  }
+
+  .paper-card--list .abstract {
+    margin: 0.375rem 0 0 0;
+    -webkit-line-clamp: 2;
+  }
+
+  .paper-card--list .code-links {
+    margin: 0.5rem 0 0 0;
+    padding: 0.625rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .paper-card--list .code-links h4 {
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .paper-card--list .code-links ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+  }
+
+  .paper-card--list .code-links li {
+    margin: 0;
+  }
 }
 </style>
