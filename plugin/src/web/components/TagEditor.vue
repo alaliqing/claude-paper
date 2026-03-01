@@ -1,6 +1,16 @@
 <template>
   <div class="tag-editor">
-    <h3 class="tag-editor__title">Edit Tags</h3>
+    <div class="tag-editor__header">
+      <h3 class="tag-editor__title">Edit Tags</h3>
+      <button
+        v-if="localTags.length > 0"
+        class="tag-editor__clear-all"
+        @click="clearAllTags"
+        type="button"
+      >
+        Clear all
+      </button>
+    </div>
 
     <div v-if="localTags.length > 0" class="tag-editor__tags">
       <div
@@ -23,10 +33,9 @@
       <input
         v-model="newTag"
         type="text"
-        placeholder="Add tag (press Enter or comma)"
+        placeholder="Add tag (press Enter)"
         class="tag-editor__input"
         @keydown.enter.prevent="addTag"
-        @keydown.comma.prevent="addTag"
       />
     </div>
 
@@ -80,6 +89,10 @@ const removeTag = (index: number) => {
   localTags.value.splice(index, 1)
 }
 
+const clearAllTags = () => {
+  localTags.value = []
+}
+
 const save = () => {
   emit('update', localTags.value)
 }
@@ -95,11 +108,34 @@ const save = () => {
   box-sizing: border-box;
 }
 
+.tag-editor__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
 .tag-editor__title {
   font-size: 1.25rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin: 0;
   color: #111827;
+}
+
+.tag-editor__clear-all {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  background: #f9fafb;
+  color: #4b5563;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.tag-editor__clear-all:hover {
+  background: #f3f4f6;
 }
 
 .tag-editor__tags {
