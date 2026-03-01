@@ -18,43 +18,45 @@
       </button>
     </div>
 
-    <div v-if="availableTags.length > 0" class="search-filter-bar__tags">
-      <span class="search-filter-bar__label">Filter by tags:</span>
-      <button
-        v-for="tag in availableTags"
-        :key="tag"
-        class="search-filter-bar__tag"
-        :class="{ 'search-filter-bar__tag--active': selectedTags.includes(tag) }"
-        @click="toggleTag(tag)"
-        type="button"
-      >
-        {{ tag }}
-      </button>
-    </div>
-
-    <div class="search-filter-bar__controls">
-      <div class="search-filter-bar__sort">
-        <label for="sort-select" class="search-filter-bar__label">Sort:</label>
-        <select
-          id="sort-select"
-          v-model="sortBy"
-          class="search-filter-bar__select"
-          @change="onSortChange"
+    <div class="search-filter-bar__row">
+      <div v-if="availableTags.length > 0" class="search-filter-bar__tags">
+        <span class="search-filter-bar__label">Filter by tags:</span>
+        <button
+          v-for="tag in availableTags"
+          :key="tag"
+          class="search-filter-bar__tag"
+          :class="{ 'search-filter-bar__tag--active': selectedTags.includes(tag) }"
+          @click="toggleTag(tag)"
+          type="button"
         >
-          <option value="default">Default</option>
-          <option value="a-z">A-Z</option>
-          <option value="z-a">Z-A</option>
-        </select>
+          {{ tag }}
+        </button>
       </div>
 
-      <button
-        v-if="hasActiveFilters"
-        class="search-filter-bar__clear-all"
-        @click="clearAll"
-        type="button"
-      >
-        Clear All
-      </button>
+      <div class="search-filter-bar__controls">
+        <div class="search-filter-bar__sort">
+          <label for="sort-select" class="search-filter-bar__label">Sort:</label>
+          <select
+            id="sort-select"
+            v-model="sortBy"
+            class="search-filter-bar__select"
+            @change="onSortChange"
+          >
+            <option value="default">Default</option>
+            <option value="a-z">A-Z</option>
+            <option value="z-a">Z-A</option>
+          </select>
+        </div>
+
+        <button
+          v-if="hasActiveFilters"
+          class="search-filter-bar__clear-all"
+          @click="clearAll"
+          type="button"
+        >
+          Clear All
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -126,18 +128,19 @@ const clearAll = () => {
 .search-filter-bar {
   background: white;
   border-radius: 0.5rem;
-  padding: 1.5rem;
+  padding: 1rem 1.25rem;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .search-filter-bar__search {
   position: relative;
-  margin-bottom: 1rem;
+  margin: 0 auto 0.75rem auto;
 }
 
 .search-filter-bar__input {
   width: 100%;
+  box-sizing: border-box;
   padding: 0.75rem 2.5rem 0.75rem 1rem;
   border: 1px solid #d1d5db;
   border-radius: 0.375rem;
@@ -168,12 +171,20 @@ const clearAll = () => {
   color: #374151;
 }
 
+.search-filter-bar__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem 1.25rem;
+  flex-wrap: wrap;
+}
+
 .search-filter-bar__tags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
-  margin-bottom: 1rem;
+  flex: 1 1 320px;
 }
 
 .search-filter-bar__label {
@@ -205,9 +216,10 @@ const clearAll = () => {
 
 .search-filter-bar__controls {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: flex-end;
   gap: 1rem;
+  flex: 1 1 220px;
 }
 
 .search-filter-bar__sort {
@@ -244,5 +256,16 @@ const clearAll = () => {
 
 .search-filter-bar__clear-all:hover {
   background-color: #e5e7eb;
+}
+
+@media (max-width: 768px) {
+  .search-filter-bar__row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-filter-bar__controls {
+    justify-content: flex-start;
+  }
 }
 </style>
