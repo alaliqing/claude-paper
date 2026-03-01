@@ -2,7 +2,7 @@
   <div class="tag-editor">
     <h3 class="tag-editor__title">Edit Tags</h3>
 
-    <div class="tag-editor__tags">
+    <div v-if="localTags.length > 0" class="tag-editor__tags">
       <div
         v-for="(tag, index) in localTags"
         :key="index"
@@ -92,6 +92,7 @@ const save = () => {
   padding: 1.5rem;
   max-width: 500px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .tag-editor__title {
@@ -106,7 +107,6 @@ const save = () => {
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 1rem;
-  min-height: 2.5rem;
 }
 
 .tag-editor__tag {
@@ -141,11 +141,14 @@ const save = () => {
 }
 
 .tag-editor__input-wrapper {
-  margin-bottom: 1.5rem;
+  width: 100%;
+  margin: 0 auto 1.5rem auto;
+  box-sizing: border-box;
 }
 
 .tag-editor__input {
   width: 100%;
+  box-sizing: border-box;
   padding: 0.5rem 0.75rem;
   border: 1px solid #d1d5db;
   border-radius: 0.375rem;
