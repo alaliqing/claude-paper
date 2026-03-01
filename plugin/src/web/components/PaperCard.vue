@@ -1,6 +1,6 @@
 <template>
-  <div class="paper-card-wrapper">
-    <NuxtLink :to="`/papers/${paper.slug}`" class="paper-card">
+  <div class="paper-card-wrapper" :class="{ 'paper-card-wrapper--list': viewMode === 'list' }">
+    <NuxtLink :to="`/papers/${paper.slug}`" class="paper-card" :class="{ 'paper-card--list': viewMode === 'list' }">
       <h3>{{ paper.title }}</h3>
       <p class="authors">{{ paper.authors.join(', ') }}</p>
       <p class="abstract">{{ paper.abstract }}</p>
@@ -50,6 +50,10 @@ const props = defineProps({
   paper: {
     type: Object as () => Paper,
     required: true
+  },
+  viewMode: {
+    type: String as () => 'grid' | 'list',
+    default: 'grid'
   }
 })
 
@@ -66,6 +70,10 @@ const getRepoName = (url) => {
   position: relative;
 }
 
+.paper-card-wrapper--list .edit-tags-button {
+  opacity: 1;
+}
+
 .paper-card {
   display: block;
   border: 1px solid #e2e8f0;
@@ -76,6 +84,10 @@ const getRepoName = (url) => {
   text-decoration: none;
   color: inherit;
   cursor: pointer;
+}
+
+.paper-card--list {
+  padding: 1.125rem 1.25rem;
 }
 
 .paper-card:hover {
@@ -180,5 +192,23 @@ const getRepoName = (url) => {
 .external-icon {
   font-size: 0.75em;
   opacity: 0.7;
+}
+
+@media (min-width: 960px) {
+  .paper-card--list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 340px);
+    column-gap: 1.25rem;
+    align-items: start;
+  }
+
+  .paper-card--list .code-links {
+    margin: 0;
+    align-self: stretch;
+  }
+
+  .paper-card--list .abstract {
+    -webkit-line-clamp: 2;
+  }
 }
 </style>

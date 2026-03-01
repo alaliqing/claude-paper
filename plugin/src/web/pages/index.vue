@@ -16,9 +16,11 @@
       <SearchFilterBar
         v-if="!loading && !error && papers.length > 0"
         :available-tags="availableTags"
+        :view-mode="viewMode"
         @search="handleSearch"
         @filter="handleFilter"
         @sort="handleSort"
+        @view="handleViewChange"
       />
 
       <div v-if="loading" class="loading-state">
@@ -32,11 +34,12 @@
       <div v-else-if="displayedPapers.length === 0" class="empty-state">
         <p>No papers match your filters.</p>
       </div>
-      <div v-else class="papers-grid">
+      <div v-else :class="viewMode === 'grid' ? 'papers-grid' : 'papers-list'">
         <PaperCard
           v-for="paper in displayedPapers"
           :key="paper.slug"
           :paper="paper"
+          :view-mode="viewMode"
           @edit-tags="openTagEditor(paper)"
         />
       </div>
@@ -61,6 +64,7 @@ const { papers, loading, error, loadPapers, updatePaperTags } = usePapers()
 const searchQuery = ref('')
 const selectedTags = ref<string[]>([])
 const sortBy = ref('default')
+const viewMode = ref<'grid' | 'list'>('grid')
 const editingPaper = ref<Paper | null>(null)
 const tagSaveError = ref<string | null>(null)
 
@@ -124,6 +128,10 @@ const handleFilter = (tags: string[]) => {
 
 const handleSort = (sort: string) => {
   sortBy.value = sort
+}
+
+const handleViewChange = (mode: 'grid' | 'list') => {
+  viewMode.value = mode
 }
 
 const openTagEditor = (paper: Paper) => {
@@ -236,6 +244,13 @@ h1 {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.papers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
   margin-top: 2rem;
 }
 
