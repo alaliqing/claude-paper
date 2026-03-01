@@ -267,7 +267,7 @@ const setViewMode = (mode: 'grid' | 'list') => {
 }
 
 .search-filter-bar__view-btn--active {
-  background: #111827;
+  background: #4b5563;
   color: #ffffff;
 }
 
