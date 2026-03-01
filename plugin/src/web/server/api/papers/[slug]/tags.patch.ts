@@ -12,14 +12,19 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const body = await readBody(event)
+  const body = await readBody<{ tags?: unknown }>(event)
 
-  if (!Array.isArray(body.tags)) {
+  if (!Array.isArray(body?.tags)) {
     throw createError({
       statusCode: 400,
       statusMessage: 'Tags must be an array'
     })
   }
+
+  const tags = body.tags
+    .filter((tag): tag is string => typeof tag === 'string')
+    .map(tag => tag.trim())
+    .filter(Boolean)
 
   try {
     const papersDir = path.join(homedir(), 'claude-papers/papers')
@@ -35,26 +40,30 @@ export default defineEventHandler(async (event) => {
     }
 
     // Update meta.json
-    let meta = {}
+    let meta: Record<string, any> = {}
     if (fs.existsSync(metaPath)) {
       meta = JSON.parse(fs.readFileSync(metaPath, 'utf-8'))
     }
-    meta.tags = body.tags
+    meta.tags = tags
     fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2))
 
-    // Update index.json
+    // Update index.json (supports both array and { papers: [] } formats)
     if (fs.existsSync(indexPath)) {
       const index = JSON.parse(fs.readFileSync(indexPath, 'utf-8'))
-      const paper = index.find((p: any) => p.slug === slug)
+      const papers = Array.isArray(index)
+        ? index
+        : (Array.isArray(index?.papers) ? index.papers : null)
+
+      const paper = papers?.find((p: any) => p.slug === slug)
       if (paper) {
-        paper.tags = body.tags
+        paper.tags = tags
         fs.writeFileSync(indexPath, JSON.stringify(index, null, 2))
       }
     }
 
     return {
       success: true,
-      tags: body.tags
+      tags
     }
   } catch (e: any) {
     if (e.statusCode) throw e

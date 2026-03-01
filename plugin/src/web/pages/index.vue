@@ -48,11 +48,12 @@
         @update="handleTagsUpdate"
         @cancel="closeTagEditor"
       />
+      <p v-if="tagSaveError" class="tag-save-error">{{ tagSaveError }}</p>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import type { Paper } from '~/composables/usePapers'
 
 const { papers, loading, error, loadPapers, updatePaperTags } = usePapers()
@@ -61,6 +62,7 @@ const searchQuery = ref('')
 const selectedTags = ref<string[]>([])
 const sortBy = ref('default')
 const editingPaper = ref<Paper | null>(null)
+const tagSaveError = ref<string | null>(null)
 
 onMounted(async () => {
   await loadPapers()
@@ -125,10 +127,12 @@ const handleSort = (sort: string) => {
 }
 
 const openTagEditor = (paper: Paper) => {
+  tagSaveError.value = null
   editingPaper.value = paper
 }
 
 const closeTagEditor = () => {
+  tagSaveError.value = null
   editingPaper.value = null
 }
 
@@ -138,6 +142,8 @@ const handleTagsUpdate = async (newTags: string[]) => {
   const success = await updatePaperTags(editingPaper.value.slug, newTags)
   if (success) {
     closeTagEditor()
+  } else {
+    tagSaveError.value = 'Failed to save tags. Please try again.'
   }
 }
 
@@ -284,9 +290,22 @@ h1 {
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: 1rem;
+  gap: 0.75rem;
+}
+
+.tag-save-error {
+  margin: 0;
+  color: #fef2f2;
+  background: rgba(127, 29, 29, 0.9);
+  border: 1px solid rgba(248, 113, 113, 0.6);
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
 }
 </style>
