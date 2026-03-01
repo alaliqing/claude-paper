@@ -97,6 +97,7 @@ Output includes:
 * full content
 * githubLinks
 * codeLinks
+* tags (generated in Step 2.5)
 
 Save to:
 
@@ -147,6 +148,31 @@ This assessment determines:
 * Whether to create .ipynb
 * Explanation depth
 * Code demo complexity
+
+---
+
+# Step 2.5: Generate Exactly 2 Semantic Tags (Mandatory)
+
+Before generating files, infer exactly 2 tags from semantic understanding of the paper.
+
+Rules:
+
+* Generate exactly 2 tags, no more and no less
+* Tags must be distinct
+* Each tag should be short (1-3 words)
+* Avoid generic tags: `paper`, `research`, `ai`, `ml`
+* Prefer one tag for problem/domain and one for method/core idea
+
+Examples:
+
+* `machine translation`, `self-attention`
+* `3d detection`, `bev transformer`
+* `protein folding`, `structure prediction`
+
+Persist these 2 tags in both locations:
+
+* `~/claude-papers/papers/{paper-slug}/meta.json` as `tags`
+* `~/claude-papers/index.json` entry as `tags`
 
 ---
 
@@ -334,6 +360,7 @@ Append new entry to the papers array:
   "abstract": "Paper abstract...",
   "year": 2024,
   "date": "2024-01-01",
+  "tags": ["tag-1", "tag-2"],
   "githubLinks": ["https://github.com/..."],
   "codeLinks": ["https://..."]
 }
