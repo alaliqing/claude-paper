@@ -76,11 +76,11 @@
             <!-- HTML file controls -->
             <div v-if="fileType === 'html'" class="html-controls">
               <button @click="toggleHtmlView" class="control-btn">
-                <span v-if="showHtmlPreview">📝 Code</span>
-                <span v-else>👁️ Preview</span>
+                <span v-if="showHtmlPreview">Code</span>
+                <span v-else>Preview</span>
               </button>
               <button @click="openHtmlInNewTab" class="control-btn">
-                <span>↗️ Open in New Tab</span>
+                <span>Open in New Tab</span>
               </button>
             </div>
           </div>
@@ -98,7 +98,7 @@
             <div v-else-if="fileType === 'html'" class="file-viewer html-viewer">
               <iframe
                 v-if="showHtmlPreview"
-                :srcdoc="fileContent"
+                :srcdoc="processedHtmlContent"
                 frameborder="0"
                 sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
               ></iframe>
@@ -107,6 +107,7 @@
             <div v-else-if="fileType === 'code'" class="file-viewer code-viewer">
               <pre><code :class="`language-${fileLanguage}`" v-html="highlightedCode"></code></pre>
             </div>
+            <div v-else-if="fileType === 'notebook'" class="file-viewer notebook-viewer" v-html="renderedNotebook"></div>
             <div v-else-if="fileContent" v-html="renderedContent" class="markdown-body"></div>
             <div v-else class="empty-state">
               <p>No content available</p>
@@ -247,7 +248,7 @@ const toggleHtmlView = () => {
 }
 
 const openHtmlInNewTab = () => {
-  const blob = new Blob([fileContent.value], { type: 'text/html' })
+  const blob = new Blob([processedHtmlContent.value], { type: 'text/html' })
   const url = URL.createObjectURL(blob)
   window.open(url, '_blank')
   // Clean up the URL after a delay
@@ -267,6 +268,98 @@ const highlightedCode = computed(() => {
   }
 })
 
+// Process HTML content to fix HiDPI canvas rendering and rewrite relative image paths
+const processedHtmlContent = computed(() => {
+  if (!fileContent.value || fileType.value !== 'html') return ''
+
+  let html = fileContent.value
+
+  // Rewrite relative image src to use the raw API endpoint
+  const htmlDir = selectedFile.value ? selectedFile.value.replace(/[^/]*$/, '') : ''
+  html = html.replace(
+    /(<img\s[^>]*?)src\s*=\s*["'](?!data:|https?:|\/\/|\/api\/)([^"']+)["']/gi,
+    (match, prefix, src) => {
+      const fullPath = htmlDir ? htmlDir + src : src
+      return `${prefix}src="/api/papers/${slug}/raw?path=${encodeURIComponent(fullPath)}"`
+    }
+  )
+
+  // Inject a script before </body> (or at the end) to fix canvas HiDPI rendering
+  // and make canvases responsive to viewport resizing via CSS scaling
+  const dpiFixScript = `<script>
+(function() {
+  var dpr = window.devicePixelRatio || 1;
+  if (dpr <= 1) return;
+
+  var origGetContext = HTMLCanvasElement.prototype.getContext;
+  HTMLCanvasElement.prototype.getContext = function(type, attrs) {
+    if (type === '2d' && !this.dataset.dpiFixed) {
+      var logicalW = this.getAttribute('width') ? parseInt(this.getAttribute('width')) : this.width;
+      var logicalH = this.getAttribute('height') ? parseInt(this.getAttribute('height')) : this.height;
+      this.dataset.dpiFixed = '1';
+      this.dataset.logicalWidth = logicalW;
+      this.dataset.logicalHeight = logicalH;
+
+      // Scale internal resolution for HiDPI sharpness
+      this.width = logicalW * dpr;
+      this.height = logicalH * dpr;
+      // Use max-width + auto height for responsive CSS scaling
+      // This lets the canvas shrink with its container while maintaining aspect ratio
+      this.style.maxWidth = '100%';
+      this.style.height = 'auto';
+      this.style.aspectRatio = logicalW + ' / ' + logicalH;
+
+      var ctx = origGetContext.call(this, type, attrs);
+      ctx.scale(dpr, dpr);
+      return ctx;
+    }
+    return origGetContext.call(this, type, attrs);
+  };
+
+  // Override width/height getters so drawing code reads logical dimensions
+  var widthDesc = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, 'width');
+  var heightDesc = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, 'height');
+
+  Object.defineProperty(HTMLCanvasElement.prototype, 'width', {
+    get: function() {
+      if (this.dataset.dpiFixed && this.dataset.logicalWidth) {
+        return parseInt(this.dataset.logicalWidth);
+      }
+      return widthDesc.get.call(this);
+    },
+    set: function(v) {
+      widthDesc.set.call(this, v);
+    },
+    configurable: true
+  });
+
+  Object.defineProperty(HTMLCanvasElement.prototype, 'height', {
+    get: function() {
+      if (this.dataset.dpiFixed && this.dataset.logicalHeight) {
+        return parseInt(this.dataset.logicalHeight);
+      }
+      return heightDesc.get.call(this);
+    },
+    set: function(v) {
+      heightDesc.set.call(this, v);
+    },
+    configurable: true
+  });
+})();
+<\/script>`
+
+  // Insert before the first <script> tag so it runs before any canvas drawing code
+  if (html.includes('<script')) {
+    html = html.replace(/<script/, dpiFixScript + '\n<script')
+  } else if (html.includes('</body>')) {
+    html = html.replace('</body>', dpiFixScript + '\n</body>')
+  } else {
+    html = dpiFixScript + '\n' + html
+  }
+
+  return html
+})
+
 const highlightedHtmlCode = computed(() => {
   if (!fileContent.value || fileType.value !== 'html') return ''
 
@@ -275,6 +368,33 @@ const highlightedHtmlCode = computed(() => {
   } catch (e) {
     return hljs.highlight(fileContent.value, { language: 'plaintext' }).value
   }
+})
+
+const renderedNotebook = computed(() => {
+  if (!fileContent.value || fileType.value !== 'notebook') return ''
+
+  // The server returns pre-structured HTML with class markers.
+  // We parse markdown cells with marked and highlight code cells with hljs.
+  let html = fileContent.value
+
+  // Render markdown cells: content between <div class="nb-cell nb-markdown"> tags
+  html = html.replace(/<div class="nb-cell nb-markdown">([\s\S]*?)<\/div>/g, (_match, md) => {
+    return `<div class="nb-cell nb-markdown">${marked.parse(md)}</div>`
+  })
+
+  // Highlight code cells
+  const lang = fileLanguage.value || 'python'
+  html = html.replace(/<code class="language-[^"]*">([\s\S]*?)<\/code>/g, (_match, code) => {
+    // Unescape HTML entities back to raw text for hljs
+    const raw = code.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+    try {
+      return `<code class="language-${lang}">${hljs.highlight(raw, { language: lang }).value}</code>`
+    } catch {
+      return `<code class="language-${lang}">${code}</code>`
+    }
+  })
+
+  return html
 })
 
 const renderedContent = computed(() => {
@@ -918,5 +1038,175 @@ useHead({
 .code-viewer code {
   font-size: 0.875rem;
   line-height: 1.6;
+}
+
+/* Notebook Viewer */
+.notebook-viewer {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem 3rem;
+}
+
+.notebook-viewer :deep(.nb-cell) {
+  margin-bottom: 1rem;
+}
+
+.notebook-viewer :deep(.nb-markdown) {
+  font-family: 'Crimson Pro', serif;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #1f2937;
+  padding: 0.5rem 0;
+}
+
+.notebook-viewer :deep(.nb-markdown h1),
+.notebook-viewer :deep(.nb-markdown h2),
+.notebook-viewer :deep(.nb-markdown h3),
+.notebook-viewer :deep(.nb-markdown h4) {
+  font-family: 'Crimson Pro', serif;
+  font-weight: 600;
+  color: #111827;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.notebook-viewer :deep(.nb-markdown h1) { font-size: 2rem; }
+.notebook-viewer :deep(.nb-markdown h2) { font-size: 1.6rem; }
+.notebook-viewer :deep(.nb-markdown h3) { font-size: 1.3rem; }
+
+.notebook-viewer :deep(.nb-markdown p) {
+  margin-bottom: 1rem;
+}
+
+.notebook-viewer :deep(.nb-markdown code) {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+  font-size: 0.8em;
+  background: #f8f9fa;
+  padding: 0.15em 0.35em;
+  border-radius: 3px;
+  border: 1px solid #e5e7eb;
+}
+
+.notebook-viewer :deep(.nb-markdown pre) {
+  background: #111827;
+  color: #e5e7eb;
+  padding: 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 0.85rem;
+}
+
+.notebook-viewer :deep(.nb-markdown pre code) {
+  background: none;
+  border: none;
+  color: inherit;
+  padding: 0;
+}
+
+.notebook-viewer :deep(.nb-markdown img) {
+  max-width: 100%;
+  height: auto;
+}
+
+.notebook-viewer :deep(.nb-input) {
+  position: relative;
+  background: #fafafa;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.notebook-viewer :deep(.nb-prompt) {
+  display: block;
+  padding: 0.5rem 1rem 0;
+  font-family: 'SF Mono', 'Monaco', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.notebook-viewer :deep(.nb-prompt.nb-in) {
+  color: #2563eb;
+}
+
+.notebook-viewer :deep(.nb-input pre) {
+  margin: 0;
+  padding: 0.5rem 1rem 0.75rem;
+  background: transparent;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+
+.notebook-viewer :deep(.nb-input code) {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+  font-size: 0.85rem;
+}
+
+.notebook-viewer :deep(.nb-output) {
+  border-left: 3px solid #e5e7eb;
+  margin-left: 0.75rem;
+  padding-left: 1rem;
+  margin-top: 0.25rem;
+}
+
+.notebook-viewer :deep(.nb-output pre) {
+  margin: 0;
+  padding: 0.5rem 0;
+  background: transparent;
+  font-family: 'SF Mono', 'Monaco', monospace;
+  font-size: 0.825rem;
+  line-height: 1.5;
+  color: #374151;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.notebook-viewer :deep(.nb-stderr) {
+  border-left-color: #fca5a5;
+}
+
+.notebook-viewer :deep(.nb-stderr pre) {
+  color: #dc2626;
+}
+
+.notebook-viewer :deep(.nb-rich) {
+  overflow-x: auto;
+}
+
+.notebook-viewer :deep(.nb-rich table) {
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  margin: 0.5rem 0;
+}
+
+.notebook-viewer :deep(.nb-rich th),
+.notebook-viewer :deep(.nb-rich td) {
+  border: 1px solid #e5e7eb;
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+}
+
+.notebook-viewer :deep(.nb-rich th) {
+  background: #f8f9fa;
+  font-weight: 600;
+}
+
+.notebook-viewer :deep(.nb-image) {
+  padding: 0.5rem 0;
+}
+
+.notebook-viewer :deep(.nb-image img) {
+  max-width: 100%;
+  height: auto;
+}
+
+.notebook-viewer :deep(.nb-raw pre) {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  font-size: 0.85rem;
+  color: #6b7280;
 }
 </style>
