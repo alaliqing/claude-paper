@@ -575,6 +575,12 @@ useHead({
   animation: fadeIn 0.4s ease;
 }
 
+/* Full-width content for HTML files */
+.content:has(.html-viewer) {
+  max-width: 100%;
+  padding: 1rem;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -793,10 +799,10 @@ useHead({
 .html-viewer {
   display: flex;
   flex-direction: column;
-  height: calc(90vh - 120px);
-  max-width: 90%;
-  margin: 0 auto;
-  padding: 2rem 0;
+  height: calc(100vh - 150px);
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .html-viewer iframe {
