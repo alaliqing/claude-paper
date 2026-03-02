@@ -513,7 +513,8 @@ useHead({
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.5rem 1rem;
+  padding: 0 1rem;
+  height: 53px;
   border-bottom: 1px solid #e5e7eb;
   background: #ffffff;
 }
@@ -576,7 +577,8 @@ useHead({
 }
 
 .reading-header {
-  padding: 1.5rem 3rem;
+  padding: 0 3rem;
+  height: 53px;
   border-bottom: 1px solid #e5e7eb;
   background: #ffffff;
   display: flex;
