@@ -71,14 +71,20 @@
         </div>
       </template>
     </NuxtLink>
-    <button
-      class="edit-tags-button"
-      @click="$emit('edit-tags')"
-      type="button"
-      title="Edit tags"
-    >
-      Edit Tags
-    </button>
+    <div class="kebab-menu" v-click-outside="closeMenu">
+      <button
+        class="kebab-button"
+        @click="toggleMenu"
+        type="button"
+        title="Actions"
+      >
+        ···
+      </button>
+      <div v-if="menuOpen" class="kebab-dropdown">
+        <button class="kebab-item" @click="handleEditTags" type="button">Edit Tags</button>
+        <button class="kebab-item kebab-item--danger" @click="handleRemove" type="button">Delete</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -96,7 +102,41 @@ const props = defineProps({
   }
 })
 
-defineEmits(['edit-tags'])
+const emit = defineEmits(['edit-tags', 'remove'])
+
+const menuOpen = ref(false)
+
+const toggleMenu = () => {
+  menuOpen.value = !menuOpen.value
+}
+
+const closeMenu = () => {
+  menuOpen.value = false
+}
+
+const handleEditTags = () => {
+  menuOpen.value = false
+  emit('edit-tags')
+}
+
+const handleRemove = () => {
+  menuOpen.value = false
+  emit('remove', props.paper.slug)
+}
+
+const vClickOutside = {
+  mounted(el: HTMLElement, binding: any) {
+    el._clickOutside = (event: MouseEvent) => {
+      if (!el.contains(event.target as Node)) {
+        binding.value()
+      }
+    }
+    document.addEventListener('click', el._clickOutside)
+  },
+  unmounted(el: HTMLElement) {
+    document.removeEventListener('click', el._clickOutside)
+  }
+}
 
 const getRepoName = (url) => {
   const match = url.match(/github\.com\/(.+?)(?:\.git)?$/)
@@ -130,28 +170,72 @@ const getRepoName = (url) => {
   transform: translateY(-2px);
 }
 
-.edit-tags-button {
+.kebab-menu {
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
-  padding: 0.375rem 0.75rem;
+  z-index: 10;
+}
+
+.kebab-button {
+  padding: 0.25rem 0.5rem;
   background-color: #f3f4f6;
   border: none;
   border-radius: 0.375rem;
-  font-size: 0.75rem;
+  font-size: 1rem;
   color: #374151;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   opacity: 0;
   transition: opacity 0.2s, background-color 0.2s;
+  line-height: 1;
 }
 
-.paper-card-wrapper:hover .edit-tags-button {
+.paper-card-wrapper:hover .kebab-button {
   opacity: 1;
 }
 
-.edit-tags-button:hover {
+.kebab-button:hover {
   background-color: #e5e7eb;
+}
+
+.kebab-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.25rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 140px;
+  overflow: hidden;
+}
+
+.kebab-item {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.875rem;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 0.825rem;
+  color: #374151;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+
+.kebab-item:hover {
+  background-color: #f3f4f6;
+}
+
+.kebab-item--danger {
+  color: #dc2626;
+}
+
+.kebab-item--danger:hover {
+  background-color: #fef2f2;
 }
 
 .tags-section {

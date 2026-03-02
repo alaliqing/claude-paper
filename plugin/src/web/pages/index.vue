@@ -41,6 +41,7 @@
           :paper="paper"
           :view-mode="viewMode"
           @edit-tags="openTagEditor(paper)"
+          @remove="handleRemovePaper"
         />
       </div>
     </div>
@@ -59,7 +60,7 @@
 <script setup lang="ts">
 import type { Paper } from '~/composables/usePapers'
 
-const { papers, loading, error, loadPapers, updatePaperTags } = usePapers()
+const { papers, loading, error, loadPapers, updatePaperTags, removePaper } = usePapers()
 
 const searchQuery = ref('')
 const selectedTags = ref<string[]>([])
@@ -153,6 +154,15 @@ const handleTagsUpdate = async (newTags: string[]) => {
   } else {
     tagSaveError.value = 'Failed to save tags. Please try again.'
   }
+}
+
+const handleRemovePaper = async (slug: string) => {
+  const paper = papers.value.find(p => p.slug === slug)
+  const title = paper?.title || slug
+  if (!confirm(`Delete "${title}"? This will permanently remove the paper and all its study materials.`)) {
+    return
+  }
+  await removePaper(slug)
 }
 
 useHead({

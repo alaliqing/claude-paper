@@ -43,6 +43,17 @@ export const usePapers = () => {
     }
   }
 
+  const removePaper = async (slug: string): Promise<boolean> => {
+    try {
+      await $fetch(`/api/papers/${slug}/delete`, { method: 'DELETE' })
+      papers.value = papers.value.filter(p => p.slug !== slug)
+      return true
+    } catch (e) {
+      console.error('Failed to remove paper:', e)
+      return false
+    }
+  }
+
   const updatePaperTags = async (slug: string, tags: string[]): Promise<boolean> => {
     try {
       await $fetch(`/api/papers/${slug}/tags`, {
@@ -69,6 +80,7 @@ export const usePapers = () => {
     loadPapers,
     getPaper,
     getPaperMarkdown,
+    removePaper,
     updatePaperTags
   }
 }
