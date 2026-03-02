@@ -72,6 +72,17 @@
               <span class="separator">/</span>
               <span class="crumb file-name">{{ selectedFile || 'README.md' }}</span>
             </div>
+
+            <!-- HTML file controls -->
+            <div v-if="fileType === 'html'" class="html-controls">
+              <button @click="toggleHtmlView" class="control-btn">
+                <span v-if="showHtmlPreview">📝 Code</span>
+                <span v-else>👁️ Preview</span>
+              </button>
+              <button @click="openHtmlInNewTab" class="control-btn">
+                <span>↗️ Open in New Tab</span>
+              </button>
+            </div>
           </div>
 
           <article class="content">
@@ -86,10 +97,12 @@
             </div>
             <div v-else-if="fileType === 'html'" class="file-viewer html-viewer">
               <iframe
+                v-if="showHtmlPreview"
                 :srcdoc="fileContent"
                 frameborder="0"
                 sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
               ></iframe>
+              <pre v-else><code class="language-html" v-html="highlightedHtmlCode"></code></pre>
             </div>
             <div v-else-if="fileType === 'code'" class="file-viewer code-viewer">
               <pre><code :class="`language-${fileLanguage}`" v-html="highlightedCode"></code></pre>
@@ -138,6 +151,7 @@ hljs.registerLanguage('yaml', yaml)
 hljs.registerLanguage('xml', xml)
 hljs.registerLanguage('css', css)
 hljs.registerLanguage('sql', sql)
+hljs.registerLanguage('html', xml) // Use xml for HTML syntax highlighting
 
 // Configure marked with KaTeX extension
 marked.use(markedKatex({
@@ -165,6 +179,7 @@ const fileLoading = ref(false)
 
 // UI state
 const sidebarCollapsed = ref(false)
+const showHtmlPreview = ref(true)
 
 // Load paper metadata and file tree
 onMounted(async () => {
@@ -227,6 +242,18 @@ const toggleSidebar = () => {
   sidebarCollapsed.value = !sidebarCollapsed.value
 }
 
+const toggleHtmlView = () => {
+  showHtmlPreview.value = !showHtmlPreview.value
+}
+
+const openHtmlInNewTab = () => {
+  const blob = new Blob([fileContent.value], { type: 'text/html' })
+  const url = URL.createObjectURL(blob)
+  window.open(url, '_blank')
+  // Clean up the URL after a delay
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
 const highlightedCode = computed(() => {
   if (!fileContent.value || fileType.value !== 'code') return ''
 
@@ -236,6 +263,16 @@ const highlightedCode = computed(() => {
     }).value
   } catch (e) {
     // If language not supported, return plain text
+    return hljs.highlight(fileContent.value, { language: 'plaintext' }).value
+  }
+})
+
+const highlightedHtmlCode = computed(() => {
+  if (!fileContent.value || fileType.value !== 'html') return ''
+
+  try {
+    return hljs.highlight(fileContent.value, { language: 'xml' }).value
+  } catch (e) {
     return hljs.highlight(fileContent.value, { language: 'plaintext' }).value
   }
 })
@@ -542,6 +579,10 @@ useHead({
   padding: 1.5rem 3rem;
   border-bottom: 1px solid #e5e7eb;
   background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 .breadcrumb {
@@ -565,6 +606,37 @@ useHead({
 
 .separator {
   opacity: 0.4;
+}
+
+.html-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.control-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  font-size: 0.875rem;
+  font-family: 'Inter', sans-serif;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.control-btn:hover {
+  background: #f8f9fa;
+  border-color: #6b7280;
+}
+
+.control-btn:active {
+  transform: translateY(1px);
 }
 
 /* Content Area */
@@ -811,6 +883,21 @@ useHead({
   background: #ffffff;
   border-radius: 8px;
   border: 1px solid #e5e7eb;
+}
+
+.html-viewer pre {
+  flex: 1;
+  margin: 0;
+  border-radius: 8px;
+  overflow: auto;
+  background: #ffffff !important;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.html-viewer code {
+  font-size: 0.875rem;
+  line-height: 1.6;
 }
 
 .code-viewer {
