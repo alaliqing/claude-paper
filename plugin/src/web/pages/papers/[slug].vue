@@ -793,8 +793,10 @@ useHead({
 .html-viewer {
   display: flex;
   flex-direction: column;
-  height: 90vh;
-  min-height: 800px;
+  height: calc(90vh - 120px);
+  max-width: 90%;
+  margin: 0 auto;
+  padding: 2rem 0;
 }
 
 .html-viewer iframe {
