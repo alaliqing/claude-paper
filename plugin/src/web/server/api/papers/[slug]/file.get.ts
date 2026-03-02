@@ -16,13 +16,18 @@ function getFileType(filename: string): string {
     return 'pdf'
   }
 
+  // HTML files - render as HTML
+  if (ext === '.html' || ext === '.htm') {
+    return 'html'
+  }
+
   // Code file extensions
   const codeExts = [
     '.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.cpp', '.c', '.h', '.hpp',
     '.cs', '.go', '.rs', '.rb', '.php', '.swift', '.kt', '.scala', '.sh',
     '.bash', '.zsh', '.fish', '.ps1', '.r', '.m', '.sql', '.json', '.xml',
     '.yaml', '.yml', '.toml', '.ini', '.cfg', '.conf', '.vue', '.svelte',
-    '.css', '.scss', '.sass', '.less', '.html', '.htm'
+    '.css', '.scss', '.sass', '.less'
   ]
   if (codeExts.includes(ext)) {
     return 'code'

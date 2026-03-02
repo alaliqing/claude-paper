@@ -84,6 +84,17 @@
             <div v-else-if="fileType === 'pdf'" class="file-viewer pdf-viewer">
               <iframe :src="fileUrl" frameborder="0"></iframe>
             </div>
+            <div v-else-if="fileType === 'html'" class="file-viewer html-viewer">
+              <div class="html-security-notice">
+                <span class="notice-icon">🔒</span>
+                <span class="notice-text">HTML rendered in sandboxed mode for security</span>
+              </div>
+              <iframe
+                :srcdoc="fileContent"
+                frameborder="0"
+                sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+              ></iframe>
+            </div>
             <div v-else-if="fileType === 'code'" class="file-viewer code-viewer">
               <pre><code :class="`language-${fileLanguage}`" v-html="highlightedCode"></code></pre>
             </div>
@@ -781,6 +792,42 @@ useHead({
   width: 100%;
   height: 100%;
   border-radius: 8px;
+}
+
+.html-viewer {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 200px);
+  min-height: 600px;
+}
+
+.html-security-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #fef3c7;
+  border: 1px solid #fbbf24;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: #92400e;
+  margin-bottom: 1rem;
+}
+
+.notice-icon {
+  font-size: 1rem;
+}
+
+.notice-text {
+  font-weight: 500;
+}
+
+.html-viewer iframe {
+  flex: 1;
+  width: 100%;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
 }
 
 .code-viewer {
