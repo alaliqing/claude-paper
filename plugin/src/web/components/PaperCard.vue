@@ -209,14 +209,14 @@ const getRepoName = (url) => {
   border: 1px solid #e2e8f0;
   border-radius: 0.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  min-width: 140px;
+  min-width: auto;
   overflow: hidden;
 }
 
 .kebab-item {
   display: block;
   width: 100%;
-  padding: 0.5rem 0.875rem;
+  padding: 0.5rem 0.75rem;
   background: none;
   border: none;
   text-align: left;
@@ -224,6 +224,7 @@ const getRepoName = (url) => {
   color: #374151;
   cursor: pointer;
   font-family: 'Inter', sans-serif;
+  white-space: nowrap;
 }
 
 .kebab-item:hover {
