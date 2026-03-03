@@ -52,13 +52,30 @@ fi
 ### Step 3: Check Port Availability
 
 ```bash
+# Get version info for comparison
+PLUGIN_VERSION=$(node -e "console.log(require('${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json').version)")
+BUILD_VERSION=""
+if [ -f ".output/.build-version" ]; then
+  BUILD_VERSION=$(cat ".output/.build-version")
+fi
+
 if lsof -i :5815 > /dev/null 2>&1; then
   echo "INFO: Port 5815 is already in use"
   PID_FILE="/tmp/claude-paper-webui.pid"
   if [ -f "$PID_FILE" ] && kill -0 $(cat "$PID_FILE") 2>/dev/null; then
-    echo "Claude Paper web UI appears to be running"
-    echo "Access it at: http://localhost:5815"
-    exit 0
+    # Check version match - restart if plugin was updated
+    if [ "$PLUGIN_VERSION" = "$BUILD_VERSION" ]; then
+      echo "Claude Paper web UI is already running (version ${PLUGIN_VERSION})"
+      echo "Access it at: http://localhost:5815"
+      exit 0
+    else
+      echo "Version mismatch: running ${BUILD_VERSION}, need ${PLUGIN_VERSION}"
+      echo "Stopping old server..."
+      kill $(cat "$PID_FILE") 2>/dev/null
+      sleep 2
+      rm -f "$PID_FILE"
+      echo "Old server stopped, will restart with new version"
+    fi
   else
     echo "ERROR: Port 5815 is occupied by another process"
     exit 1
