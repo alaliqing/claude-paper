@@ -238,6 +238,12 @@ const setViewMode = (mode: 'grid' | 'list') => {
   color: white;
 }
 
+.search-filter-bar__tag--active:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
+  color: white;
+}
+
 .search-filter-bar__controls {
   display: flex;
   align-items: center;
