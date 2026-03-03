@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "claude-paper",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "description": "A plugin for studying research papers with automated material generation, code demos, and a web viewer",
       "author": {
         "name": "alaliqing"
