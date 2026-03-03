@@ -1,6 +1,6 @@
 {
   "name": "claude-paper",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "scripts": {
     "dev:web": "cd src/web && npm run dev",

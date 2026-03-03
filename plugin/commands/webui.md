@@ -28,17 +28,24 @@ else
 fi
 ```
 
-### Step 2: Build Production Server
+### Step 2: Build Production Server (auto-rebuilds on plugin update)
 
 ```bash
 cd ${CLAUDE_PLUGIN_ROOT}/src/web
 
-if [ ! -f ".output/server/index.mjs" ] || [ ! -f ".output/server/package.json" ]; then
-  echo "Building production server..."
+PLUGIN_VERSION=$(node -e "console.log(require('${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json').version)")
+BUILD_VERSION=""
+if [ -f ".output/.build-version" ]; then
+  BUILD_VERSION=$(cat ".output/.build-version")
+fi
+
+if [ ! -f ".output/server/index.mjs" ] || [ "$PLUGIN_VERSION" != "$BUILD_VERSION" ]; then
+  echo "Building production server (v${PLUGIN_VERSION})..."
   npm run build
+  echo "$PLUGIN_VERSION" > .output/.build-version
   echo "Build complete!"
 else
-  echo "Production build already exists"
+  echo "Production build is up to date (v${BUILD_VERSION})"
 fi
 ```
 
