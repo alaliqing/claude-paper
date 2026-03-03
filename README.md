@@ -123,15 +123,13 @@ Papers are organized in `~/claude-papers/papers/{paper-slug}/`:
 │       ├── mental-model.md              # Paper categorization (if needed)
 │       ├── reflection.md                # Future directions (if needed)
 │       ├── qa.md                         # Learning questions
+│       ├── index.html                    # Interactive HTML explorer
 │       ├── images/                       # Extracted figures and tables
 │       │   ├── fig1.png
 │       │   └── fig2.png
 │       └── code/                         # Code demonstrations
-│           ├── code-demo.py              # Clean reference implementation
-│           ├── code-demo.ipynb           # Interactive Jupyter notebook
-│           └── original-code/            # Original paper code (if available)
-│               ├── README.md
-│               └── [repository files]
+│           ├── core-demo.py              # Clean reference implementation
+│           └── concept-demo.ipynb        # Interactive Jupyter notebook
 │
 └── index.json                           # Global search index
 ```

@@ -123,15 +123,13 @@ Claude 将自动触发学习工作流程并：
 │       ├── mental-model.md              # 论文分类（如需要）
 │       ├── reflection.md                # 未来方向（如需要）
 │       ├── qa.md                         # 学习问题
+│       ├── index.html                    # 交互式 HTML 探索器
 │       ├── images/                       # 提取的图表和表格
 │       │   ├── fig1.png
 │       │   └── fig2.png
 │       └── code/                         # 代码演示
-│           ├── code-demo.py              # 清晰的参考实现
-│           ├── code-demo.ipynb           # 交互式 Jupyter 笔记本
-│           └── original-code/            # 原始论文代码（如有）
-│               ├── README.md
-│               └── [仓库文件]
+│           ├── core-demo.py              # 清晰的参考实现
+│           └── concept-demo.ipynb        # 交互式 Jupyter 笔记本
 │
 └── index.json                           # 全局搜索索引
 ```
