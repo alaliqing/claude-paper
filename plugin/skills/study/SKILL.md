@@ -323,56 +323,24 @@ Avoid generic names.
 
 # Step 5: Generate Interactive HTML Explorer
 
-Create a single self-contained HTML file that lets the user interactively explore the paper's core concepts.
+Create a single self-contained HTML file for interactively exploring the paper's core concepts.
 
 **Output path:**
 ```
 ~/claude-papers/papers/{paper-slug}/index.html
 ```
 
-## Paper-Type-Adapted Interaction Patterns
+## Requirements
 
-Use the assessment from Step 2 to determine the primary interaction pattern:
+* Single HTML file, all CSS/JS inline, zero external dependencies
+* Uses **real data from the paper** (actual metrics, hyperparameters, comparisons) — never invent numbers
+* Must work in a sandboxed iframe (no external fetches, no localStorage)
 
-| Paper Type | Primary Pattern | Example Controls |
-|---|---|---|
-| Architecture | Interactive component diagram + parameter explorer | Layer count, dimensions, attention heads sliders |
-| Theoretical | Formula breakdown + parameter sensitivity curves | Variable values, assumption toggles |
-| Empirical | Result dashboard + ablation toggle explorer | Dataset selector, method toggles, metric selector |
-| System design | Pipeline visualizer + scaling explorer | Scale params, component toggles |
-| Survey | Taxonomy navigator + method comparison matrix | Category filters, time range, sort criteria |
+## Guidelines
 
-## HTML Structure Requirements
+Choose the interaction pattern that best fits the paper — architecture diagrams, parameter explorers, result dashboards, formula breakdowns, comparison matrices, etc. Let the paper's content dictate the format rather than forcing a fixed layout.
 
-The explorer must be a **single self-contained HTML file** with all CSS and JS inline. Zero external dependencies.
-
-### Layout
-- **Two-panel layout**: controls sidebar (left) + visualization area (right)
-- The entire right panel is visualization — no prompt output section, no copy button
-- Focus on teaching the paper's core concepts through interaction
-
-### State Management
-```
-DEFAULTS object → state object → updateAll() entry point
-```
-- `DEFAULTS`: hardcoded object with the paper's primary configuration values
-- `state`: mutable copy of DEFAULTS, updated by controls
-- `updateAll()`: single entry point that re-renders everything from current state
-
-### Required Interactive Elements
-- **3-5 exploration modes** via a dropdown (each showing a different facet of the paper)
-- **3-5 preset buttons** with paper-specific configurations (e.g., "Default", "Lightweight", "High Accuracy")
-- **Sliders, toggles, or selectors** that control parameters — every control must visibly change the visualization
-
-### Content Rules
-- Use **real data from the paper** (actual metrics, hyperparameters, comparisons) — never invent metrics
-- Sensible defaults that show the paper's primary configuration on first load
-- Include explanatory text alongside interactive elements to teach concepts
-- Must work in the web UI's sandboxed iframe (no external fetches, no localStorage)
-
-### Visual Style
-- Clean typography with system font stack
-- Metric cards, architecture diagrams, and legends as appropriate for the paper type
+Every interactive control (slider, toggle, dropdown) should visibly change the visualization. Include brief explanatory text alongside interactive elements to teach concepts.
 
 ---
 
