@@ -16,12 +16,11 @@ This skill starts the Claude Paper web viewer using the production Nuxt.js serve
 if [ -n "$CLAUDE_PLUGIN_ROOT" ] && [ -d "$CLAUDE_PLUGIN_ROOT/src/web" ]; then
   _CP_PLUGIN="$CLAUDE_PLUGIN_ROOT"
 else
-  _CP_NPM="$HOME/.claude-paper"
-  _CP_PLUGIN="$_CP_NPM/node_modules/claude-paper/plugin"
+  _CP_PLUGIN="$HOME/.claude-paper/plugin"
   if [ ! -d "$_CP_PLUGIN/src/web" ]; then
     echo "Setting up claude-paper (first time)..."
-    mkdir -p "$_CP_NPM"
-    npm install --prefix "$_CP_NPM" claude-paper 2>&1 | tail -2
+    git clone --depth=1 https://github.com/alaliqing/claude-paper.git "$HOME/.claude-paper/repo" 2>&1 | tail -2
+    ln -sf "$HOME/.claude-paper/repo/plugin" "$_CP_PLUGIN"
     echo "Setup complete!"
   fi
 fi

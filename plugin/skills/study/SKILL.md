@@ -43,12 +43,11 @@ if [ -n "$CLAUDE_PLUGIN_ROOT" ] && [ -d "$CLAUDE_PLUGIN_ROOT/skills" ]; then
     echo "Dependencies installed!"
   fi
 else
-  _CP_NPM="$HOME/.claude-paper"
-  _CP_PLUGIN="$_CP_NPM/node_modules/claude-paper/plugin"
+  _CP_PLUGIN="$HOME/.claude-paper/plugin"
   if [ ! -d "$_CP_PLUGIN/skills" ]; then
     echo "Setting up claude-paper (first time)..."
-    mkdir -p "$_CP_NPM"
-    npm install --prefix "$_CP_NPM" claude-paper 2>&1 | tail -2
+    git clone --depth=1 https://github.com/alaliqing/claude-paper.git "$HOME/.claude-paper/repo" 2>&1 | tail -2
+    ln -sf "$HOME/.claude-paper/repo/plugin" "$_CP_PLUGIN"
     python3 -m pip install pymupdf --user 2>/dev/null || pip3 install pymupdf --user 2>/dev/null || echo "Warning: Failed to install pymupdf"
     echo "Setup complete!"
   fi
