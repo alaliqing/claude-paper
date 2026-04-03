@@ -43,13 +43,18 @@ if [ -n "$CLAUDE_PLUGIN_ROOT" ] && [ -d "$CLAUDE_PLUGIN_ROOT/skills" ]; then
     echo "Dependencies installed!"
   fi
 else
+  _CP_REPO="$HOME/.claude-paper/repo"
   _CP_PLUGIN="$HOME/.claude-paper/plugin"
-  if [ ! -d "$_CP_PLUGIN/skills" ]; then
+  if [ ! -d "$_CP_REPO/.git" ]; then
     echo "Setting up claude-paper (first time)..."
-    git clone --depth=1 https://github.com/alaliqing/claude-paper.git "$HOME/.claude-paper/repo" 2>&1 | tail -2
-    ln -sf "$HOME/.claude-paper/repo/plugin" "$_CP_PLUGIN"
+    rm -rf "$_CP_REPO"
+    git clone --depth=1 https://github.com/alaliqing/claude-paper.git "$_CP_REPO" 2>&1 | tail -2
+    ln -snf "$_CP_REPO/plugin" "$_CP_PLUGIN"
     python3 -m pip install pymupdf --user 2>/dev/null || pip3 install pymupdf --user 2>/dev/null || echo "Warning: Failed to install pymupdf"
     echo "Setup complete!"
+  else
+    echo "Checking for updates..."
+    git -C "$_CP_REPO" pull --ff-only 2>&1 | tail -1
   fi
 fi
 ```
