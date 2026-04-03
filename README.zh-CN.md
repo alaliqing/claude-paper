@@ -45,6 +45,18 @@
 
 ### 安装
 
+#### 方式一 — npx skills（适配大多数 coding CLI）
+
+支持 Claude Code、Gemini CLI、Copilot CLI、Cursor、Windsurf 等[众多 AI 编程工具](https://github.com/vercel-labs/skills#readme)：
+
+```bash
+npx skills add alaliqing/claude-paper
+```
+
+技能默认全局安装。首次运行时会自动通过 npm 将脚本安装到 `~/.claude-paper/`。
+
+#### 方式二 — Claude Code 插件
+
 从 Claude Code 市场安装：
 
 ```bash
@@ -67,7 +79,6 @@
 
 - **Node.js**: 18.0.0 或更高版本
 - **npm**: 随 Node.js 一起安装
-- **Claude Code**: 支持插件的最新版本
 - **poppler-utils**: 用于 PDF 图像提取（通过系统包管理器安装）
   - **macOS**: `brew install poppler`
   - **Ubuntu/Debian**: `sudo apt-get install poppler-utils`

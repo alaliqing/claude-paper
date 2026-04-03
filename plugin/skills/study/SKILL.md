@@ -27,19 +27,31 @@ This workflow is not just for summarizing — it builds a learning environment a
 
 ---
 
-# Step 0: Check Dependencies (First Run Only)
+# Step 0: Resolve Plugin Root and Check Dependencies (First Run Only)
 
 ```bash
-if [ ! -f "${CLAUDE_PLUGIN_ROOT}/.installed" ]; then
-  echo "First run - installing dependencies..."
-  cd "${CLAUDE_PLUGIN_ROOT}"
-  npm install || exit 1
-
-  # Install Python dependencies for image extraction
-  python3 -m pip install pymupdf --user 2>/dev/null || pip3 install pymupdf --user 2>/dev/null || echo "Warning: Failed to install pymupdf"
-
-  touch "${CLAUDE_PLUGIN_ROOT}/.installed"
-  echo "Dependencies installed!"
+# Resolve plugin directory - supports Claude Code plugin mode and npx skills mode
+if [ -n "$CLAUDE_PLUGIN_ROOT" ] && [ -d "$CLAUDE_PLUGIN_ROOT/skills" ]; then
+  _CP_PLUGIN="$CLAUDE_PLUGIN_ROOT"
+  # Install Node/Python dependencies on first run
+  if [ ! -f "${_CP_PLUGIN}/.installed" ]; then
+    echo "First run - installing dependencies..."
+    cd "${_CP_PLUGIN}"
+    npm install || exit 1
+    python3 -m pip install pymupdf --user 2>/dev/null || pip3 install pymupdf --user 2>/dev/null || echo "Warning: Failed to install pymupdf"
+    touch "${_CP_PLUGIN}/.installed"
+    echo "Dependencies installed!"
+  fi
+else
+  _CP_NPM="$HOME/.claude-paper"
+  _CP_PLUGIN="$_CP_NPM/node_modules/claude-paper/plugin"
+  if [ ! -d "$_CP_PLUGIN/skills" ]; then
+    echo "Setting up claude-paper (first time)..."
+    mkdir -p "$_CP_NPM"
+    npm install --prefix "$_CP_NPM" claude-paper 2>&1 | tail -2
+    python3 -m pip install pymupdf --user 2>/dev/null || pip3 install pymupdf --user 2>/dev/null || echo "Warning: Failed to install pymupdf"
+    echo "Setup complete!"
+  fi
 fi
 ```
 
@@ -66,7 +78,7 @@ USER_INPUT="<user-input>"
 # Check if input is a URL (starts with http:// or https://)
 if [[ "$USER_INPUT" =~ ^https?:// ]]; then
   # Download PDF from URL
-  INPUT_PATH=$(node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/download-pdf.cjs "$USER_INPUT")
+  INPUT_PATH=$(node ${_CP_PLUGIN}/skills/study/scripts/download-pdf.cjs "$USER_INPUT")
 else
   # Use local path directly
   INPUT_PATH="$USER_INPUT"
@@ -86,7 +98,7 @@ For local paths, use the path directly without downloading.
 Extract structured information:
 
 ```bash
-node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/parse-pdf.js "$INPUT_PATH"
+node ${_CP_PLUGIN}/skills/study/scripts/parse-pdf.js "$INPUT_PATH"
 ```
 
 Output includes:
@@ -349,7 +361,7 @@ Every interactive control (slider, toggle, dropdown) should visibly change the v
 ```bash
 mkdir -p ~/claude-papers/papers/{paper-slug}/images
 
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/extract-images.py \
+python3 ${_CP_PLUGIN}/skills/study/scripts/extract-images.py \
   paper.pdf \
   ~/claude-papers/papers/{paper-slug}/images
 ```

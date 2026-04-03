@@ -9,20 +9,38 @@ allowed-tools: Bash
 
 This skill starts the Claude Paper web viewer using the production Nuxt.js server.
 
+## Step 0: Resolve Plugin Root
+
+```bash
+# Resolve plugin directory - supports Claude Code plugin mode and npx skills mode
+if [ -n "$CLAUDE_PLUGIN_ROOT" ] && [ -d "$CLAUDE_PLUGIN_ROOT/src/web" ]; then
+  _CP_PLUGIN="$CLAUDE_PLUGIN_ROOT"
+else
+  _CP_NPM="$HOME/.claude-paper"
+  _CP_PLUGIN="$_CP_NPM/node_modules/claude-paper/plugin"
+  if [ ! -d "$_CP_PLUGIN/src/web" ]; then
+    echo "Setting up claude-paper (first time)..."
+    mkdir -p "$_CP_NPM"
+    npm install --prefix "$_CP_NPM" claude-paper 2>&1 | tail -2
+    echo "Setup complete!"
+  fi
+fi
+```
+
 ## Step 1: Check and Install Dependencies (First Run Only)
 
 Check if web dependencies are installed (with corruption check):
 ```bash
-if [ ! -f "${CLAUDE_PLUGIN_ROOT}/src/web/node_modules/.package-lock.json" ] || [ ! -d "${CLAUDE_PLUGIN_ROOT}/src/web/node_modules/@nuxt" ]; then
-  if [ ! -d "${CLAUDE_PLUGIN_ROOT}/src/web/node_modules/@nuxt" ]; then
+if [ ! -f "${_CP_PLUGIN}/src/web/node_modules/.package-lock.json" ] || [ ! -d "${_CP_PLUGIN}/src/web/node_modules/@nuxt" ]; then
+  if [ ! -d "${_CP_PLUGIN}/src/web/node_modules/@nuxt" ]; then
     echo "ERROR: node_modules is corrupted, performing clean install..."
-    cd "${CLAUDE_PLUGIN_ROOT}/src/web"
+    cd "${_CP_PLUGIN}/src/web"
     rm -rf node_modules package-lock.json
     npm install
     echo "Web dependencies installed!"
   else
     echo "First run - installing web dependencies..."
-    cd "${CLAUDE_PLUGIN_ROOT}/src/web"
+    cd "${_CP_PLUGIN}/src/web"
     npm install
     echo "Web dependencies installed!"
   fi
@@ -35,9 +53,9 @@ fi
 
 Build if needed or if plugin version changed:
 ```bash
-cd ${CLAUDE_PLUGIN_ROOT}/src/web
+cd ${_CP_PLUGIN}/src/web
 
-PLUGIN_VERSION=$(node -e "console.log(require('${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json').version)")
+PLUGIN_VERSION=$(node -e "console.log(require('${_CP_PLUGIN}/.claude-plugin/plugin.json').version)")
 BUILD_VERSION=""
 if [ -f ".output/.build-version" ]; then
   BUILD_VERSION=$(cat ".output/.build-version")
@@ -58,7 +76,7 @@ fi
 Ensure port 5815 is available (with version check restart):
 ```bash
 # Get version info for comparison
-PLUGIN_VERSION=$(node -e "console.log(require('${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json').version)")
+PLUGIN_VERSION=$(node -e "console.log(require('${_CP_PLUGIN}/.claude-plugin/plugin.json').version)")
 BUILD_VERSION=""
 if [ -f ".output/.build-version" ]; then
   BUILD_VERSION=$(cat ".output/.build-version")
@@ -92,7 +110,7 @@ fi
 
 Start the server in background:
 ```bash
-PORT=5815 node .output/server/index.mjs &
+PORT=5815 node ${_CP_PLUGIN}/src/web/.output/server/index.mjs &
 SERVER_PID=$!
 
 # Save PID for later cleanup

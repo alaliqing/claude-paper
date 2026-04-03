@@ -45,6 +45,18 @@ A powerful **Claude Code plugin** that automates research paper study through in
 
 ### Installation
 
+#### Option 1 — npx skills (any coding CLI)
+
+Works with Claude Code, Gemini CLI, Copilot CLI, Cursor, Windsurf, and [many more](https://github.com/vercel-labs/skills#readme):
+
+```bash
+npx skills add alaliqing/claude-paper
+```
+
+Skills are installed globally by default. The first time a skill runs it will automatically install its scripts via npm to `~/.claude-paper/`.
+
+#### Option 2 — Claude Code plugin
+
 Install from the Claude Code marketplace:
 
 ```bash
@@ -67,7 +79,6 @@ Install from the Claude Code marketplace:
 
 - **Node.js**: 18.0.0 or higher
 - **npm**: Comes with Node.js
-- **Claude Code**: Latest version with plugin support
 - **poppler-utils**: For PDF image extraction (install via system package manager)
   - **macOS**: `brew install poppler`
   - **Ubuntu/Debian**: `sudo apt-get install poppler-utils`
