@@ -13,6 +13,10 @@ Invoke this skill with a paper PDF path.
 - Example: User says "我们学习一下这篇论文吧" → Generate materials in Chinese
 - Example: User says "Let's study this paper" → Generate materials in English
 
+Also map the detected language to a MinerU hint for parsing (used in Step 1b as
+`$LANG_HINT`): Chinese → `ch`, English → `en`, Japanese → `japan`, Korean →
+`korean`. When unsure, default to `ch` (MinerU auto-detects within a document).
+
 ---
 
 # Core Philosophy
@@ -33,10 +37,7 @@ This workflow is not just for summarizing — it builds a learning environment a
 if [ ! -f "${CLAUDE_PLUGIN_ROOT}/.installed" ]; then
   echo "First run - installing dependencies..."
   cd "${CLAUDE_PLUGIN_ROOT}"
-  npm install || exit 1
-
-  # Install Python dependencies for image extraction
-  python3 -m pip install pymupdf --user 2>/dev/null || pip3 install pymupdf --user 2>/dev/null || echo "Warning: Failed to install pymupdf"
+  npm install || exit 1   # installs the MinerU CLI (mineru-open-api)
 
   touch "${CLAUDE_PLUGIN_ROOT}/.installed"
   echo "Dependencies installed!"
@@ -46,7 +47,35 @@ fi
 Recommended:
 
 * Node >= 18
-* Python 3 with pip (for image extraction)
+
+PDF parsing is handled by **MinerU** (`mineru-open-api`), installed automatically
+via `npm install`. MinerU performs VLM-based layout analysis and returns
+high-fidelity Markdown with correct reading order, formulas (LaTeX), tables, and
+extracted image assets — replacing the old plain-text parser.
+
+**MinerU token (required):** the `extract` mode needs a free API token.
+
+```bash
+# Token is resolved as: --token flag > MINERU_TOKEN env > ~/.mineru/config.yaml
+if [ -z "$MINERU_TOKEN" ] && [ ! -f "$HOME/.mineru/config.yaml" ]; then
+  echo "MinerU token not configured."
+  echo "  1. Create one at: https://mineru.net/apiManage/token"
+  echo "  2. Run: mineru-open-api auth   (or: export MINERU_TOKEN=\"your-token\")"
+fi
+```
+
+If no token is configured, stop and ask the user to set one before continuing.
+
+**Regional endpoint (troubleshooting):** if parsing fails with a TLS error like
+`certificate is valid for *.mineru.org.cn, not mineru.net` (common in mainland
+China, where DNS routes mineru.net to a node whose cert only covers
+mineru.org.cn), point the CLI at the matching endpoint:
+
+```bash
+export MINERU_BASE_URL="https://mineru.org.cn/api/v4"
+```
+
+The parser forwards this to `mineru-open-api --base-url`.
 
 ---
 
@@ -81,22 +110,33 @@ For URLs, the download script will:
 
 For local paths, use the path directly without downloading.
 
-## Step 1b: Parse PDF
+## Step 1b: Parse PDF with MinerU
 
-Extract structured information:
+Extract structured information. Pass a MinerU language hint based on the
+detected user language (`ch` for Chinese, `en` for English, etc.):
 
 ```bash
-node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/parse-pdf.js "$INPUT_PATH"
+# Choose output dir under the paper folder so images land alongside it
+PARSE_OUT=$(mktemp -d)
+
+node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/parse-pdf.cjs "$INPUT_PATH" "$PARSE_OUT" "$LANG_HINT"
 ```
+
+The script:
+
+* Runs `mineru-open-api extract` (formula + table recognition on by default)
+* Reads MinerU's Markdown + JSON output and assembles structured metadata
+* Emits a single JSON object on stdout
 
 Output includes:
 
 * title
 * authors
 * abstract
-* full content
+* content (full Markdown — formulas, tables, reading order preserved; **not truncated**)
 * githubLinks
 * codeLinks
+* images (paths to MinerU-extracted image assets — used in Step 6)
 * tags (generated in Step 2.5)
 
 Save to:
@@ -111,8 +151,12 @@ Copy original PDF:
 cp <pdf-path> ~/claude-papers/papers/{paper-slug}/paper.pdf
 ```
 
-Fallback:
-If structured parsing fails, extract raw text and continue with degraded structure.
+If parsing fails:
+The script exits non-zero with a clear message. Exit code 2 means the MinerU
+token is missing — guide the user to configure it (see Step 0) and retry.
+Other failures usually mean an invalid token, a document over MinerU's limits
+(200MB / 600 pages), rate limiting (HTTP 429), or a network error. Surface the
+error to the user rather than silently degrading.
 
 ---
 
@@ -344,21 +388,26 @@ Every interactive control (slider, toggle, dropdown) should visibly change the v
 
 ---
 
-# Step 6: Extract Images
+# Step 6: Collect Images
+
+MinerU already extracted the paper's figures during Step 1b. Their paths are in
+the `images` array of the parsed metadata (under `$PARSE_OUT`). Copy them into
+the paper folder:
 
 ```bash
 mkdir -p ~/claude-papers/papers/{paper-slug}/images
 
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/extract-images.py \
-  paper.pdf \
-  ~/claude-papers/papers/{paper-slug}/images
+# Copy every image MinerU extracted (paths come from meta.json "images")
+cp "$PARSE_OUT"/**/*.{png,jpg,jpeg,webp} ~/claude-papers/papers/{paper-slug}/images/ 2>/dev/null || true
 ```
 
-Rename key images descriptively:
+Then inspect the figures and rename the key ones descriptively:
 
 * architecture.png
 * training_pipeline.png
 * results_table.png
+
+If MinerU extracted no images (rare — e.g. a text-only paper), skip this step.
 
 ---
 

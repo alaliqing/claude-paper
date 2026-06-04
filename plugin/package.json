@@ -7,6 +7,6 @@
     "build:web": "cd src/web && npm run build"
   },
   "dependencies": {
-    "pdf-parse": "^1.1.1"
+    "mineru-open-api": "^0.5.9"
   }
 }

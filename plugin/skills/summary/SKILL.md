@@ -33,15 +33,20 @@ This skill generates a **concise summary** of a research paper's core ideas and 
 if [ ! -f "${CLAUDE_PLUGIN_ROOT}/.installed" ]; then
   echo "First run - installing dependencies..."
   cd "${CLAUDE_PLUGIN_ROOT}"
-  npm install || exit 1
-
-  # Install Python dependencies for image extraction
-  python3 -m pip install pymupdf --user 2>/dev/null || pip3 install pymupdf --user 2>/dev/null || echo "Warning: Failed to install pymupdf"
+  npm install || exit 1   # installs the MinerU CLI (mineru-open-api)
 
   touch "${CLAUDE_PLUGIN_ROOT}/.installed"
   echo "Dependencies installed!"
 fi
 ```
+
+PDF parsing uses **MinerU** (`mineru-open-api`), which needs a free API token.
+If `MINERU_TOKEN` is unset and `~/.mineru/config.yaml` is absent, ask the user to
+create a token at https://mineru.net/apiManage/token and run `mineru-open-api
+auth` (or `export MINERU_TOKEN="..."`) before continuing.
+
+If parsing fails with a TLS error mentioning `*.mineru.org.cn` (common in
+mainland China), set `export MINERU_BASE_URL="https://mineru.org.cn/api/v4"`.
 
 ---
 
@@ -73,19 +78,22 @@ For URLs, the download script will:
 - Validate that URLs point to PDF files
 - Return the local file path for processing
 
-## Step 1b: Parse PDF
+## Step 1b: Parse PDF with MinerU
 
-Extract structured information:
+Extract structured information (pass a MinerU language hint — `ch`/`en`/etc. —
+based on the detected user language):
 
 ```bash
-node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/parse-pdf.js "$INPUT_PATH"
+PARSE_OUT=$(mktemp -d)
+
+node ${CLAUDE_PLUGIN_ROOT}/skills/study/scripts/parse-pdf.cjs "$INPUT_PATH" "$PARSE_OUT" "$LANG_HINT"
 ```
 
 Output includes:
 - title
 - authors
 - abstract
-- full content
+- content (full Markdown, not truncated)
 - githubLinks
 - codeLinks
 
@@ -99,6 +107,10 @@ Copy original PDF:
 ```bash
 cp <pdf-path> ~/claude-papers/papers/{paper-slug}/paper.pdf
 ```
+
+If the script exits non-zero: exit code 2 means the MinerU token is missing
+(guide the user to configure it); other failures mean an invalid token, a
+document over MinerU's limits, rate limiting, or a network error.
 
 ---
 

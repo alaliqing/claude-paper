@@ -120,9 +120,14 @@ async function downloadFile(url, redirects = 0) {
         return;
       }
 
-      // Generate filename
+      // Generate filename — always ensure a .pdf extension so downstream
+      // tools (e.g. MinerU) recognize the file type. arXiv redirects strip
+      // the extension (/pdf/1706.03762.pdf -> /pdf/1706.03762).
       const urlBasename = path.basename(urlObj.pathname);
-      const filename = urlBasename || `downloaded-${Date.now()}.pdf`;
+      let filename = urlBasename || `downloaded-${Date.now()}.pdf`;
+      if (!filename.toLowerCase().endsWith('.pdf')) {
+        filename += '.pdf';
+      }
       const filepath = path.join(DOWNLOAD_DIR, filename);
 
       // Stream to file
@@ -208,7 +213,7 @@ async function main() {
       localPath = validateLocalPath(input);
     }
 
-    // Output local path (for parse-pdf.js to consume)
+    // Output local path (for parse-pdf.cjs to consume)
     console.log(localPath);
   } catch (err) {
     console.error(`Error: ${err.message}`);
